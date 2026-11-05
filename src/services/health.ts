@@ -7,6 +7,20 @@ export type HealthCheckResult = {
   message: string;
 };
 
+export const getFriendlyErrorMessage = (error: unknown, status?: number): string => {
+  if (status && status !== 200) {
+    return 'Server menjawab dengan kesalahan. Coba lagi.';
+  }
+  if (error instanceof Error) {
+    if (error.name === 'AbortError') {
+      return 'Server tidak merespons. Pastikan server API berjalan dan HP serta laptop di jaringan yang sama.';
+    }
+    // Generic network failure
+    return 'Tidak dapat terhubung ke server. Periksa jaringan dan alamat server.';
+  }
+  return 'Terjadi kesalahan saat memeriksa koneksi';
+};
+
 export async function checkHealth(): Promise<HealthCheckResult> {
   if (!API_BASE_URL) {
     return {
@@ -28,31 +42,20 @@ export async function checkHealth(): Promise<HealthCheckResult> {
 
     if (response.ok) {
       return { ok: true };
-    } else {
-      return {
-        ok: false,
-        message: `Server error: ${response.status}`,
-      };
     }
-  } catch (error) {
-    clearTimeout(timeoutId);
-
-    if (error instanceof Error) {
-      if (error.name === 'AbortError') {
-        return {
-          ok: false,
-          message: 'Koneksi timeout (15 detik)',
-        };
-      }
-      return {
-        ok: false,
-        message: error.message,
-      };
-    }
-
+    
+    console.warn(`Health check failed with status: ${response.status}`);
     return {
       ok: false,
-      message: 'Terjadi kesalahan saat memeriksa koneksi',
+      message: getFriendlyErrorMessage(null, response.status),
+    };
+  } catch (error) {
+    clearTimeout(timeoutId);
+    console.warn('Health check error:', error);
+    return {
+      ok: false,
+      message: getFriendlyErrorMessage(error),
     };
   }
 }
+
