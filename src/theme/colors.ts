@@ -1,15 +1,33 @@
+/**
+ * Color tokens dari design-report.md Bagian 1
+ * Palet: hitam hangat, cokelat gelap, cream, emas
+ */
 export const Colors = {
-  background: '#161311', // Latar halaman, paling gelap
-  surface: '#1D1814',    // Latar permukaan / kartu
-  surfaceElevated: '#241F1C', // Kartu terangkat / kolom cari
-  border: '#3A312B',     // Garis tepi dan pemisah
-  primary: '#6B4423',    // Tombol utama "Pilih dari Galeri"
-  primaryVariant: '#705234', // Varian cokelat
-  accent: '#D4AF37',     // Aksen emas: wordmark, tab aktif, lencana
-  accentMuted: '#B18A5D', // Emas redup / ikon
-  text: '#F4EBD9',       // Teks utama krem
-  textOnPrimary: '#FFFFFF', // Teks di atas tombol
-  textSecondary: '#A39893', // Teks sekunder dan ikon tab nonaktif
-  textTertiary: '#736B67', // Teks sangat sekunder
-  warning: '#D97706',    // Warna peringatan
+  // Latar dan permukaan
+  background: '#161311',        // Latar halaman (hitam kecokelatan)
+  surface: '#1D1814',           // Isi kartu unggah
+  surfaceElevated: '#241F1C',   // Isi kartu motif Katalog
+  
+  // Garis dan pemisah
+  border: '#3A312B',            // Garis pemisah navigasi bawah
+  divider: '#3A312B',           // Alias untuk konsistensi
+  
+  // Tombol dan interaksi
+  primaryButton: '#6B4423',     // Isi tombol "Pilih dari Galeri", garis putus-putus kartu
+  onPrimaryButton: '#FFFFFF',   // Teks "Pilih dari Galeri"
+  
+  // Aksen dan status
+  accent: '#D4AF37',            // Emas: wordmark "ScanTik", tab aktif, lencana, ikon tab aktif
+  
+  // Teks
+  textPrimary: '#F4EBD9',       // Teks utama / judul (cream)
+  textSecondary: '#A39893',     // Teks sekunder, sapaan, metadata, ikon/label tab nonaktif
+  
+  // Tab navigasi
+  tabActive: '#D4AF37',         // Warna ikon dan label tab aktif
+  tabInactive: '#A39893',       // Warna ikon dan label tab nonaktif
+  
+  // Lencana
+  badgeBackground: '#D4AF37',   // Isi lencana "Kecocokan 94%"
+  onBadge: '#161311',           // Teks lencana (sama dengan latar halaman)
 };

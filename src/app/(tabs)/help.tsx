@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import Constants from 'expo-constants';
 import { Colors } from '@/theme/colors';
+import { Typography } from '@/theme/typography';
 import { API_BASE_URL } from '@/config/api';
 import { checkHealth, HealthCheckResult } from '@/services/health';
 import AppIcon from '@/components/AppIcon';
@@ -59,7 +60,7 @@ export default function HelpScreen() {
             <Text style={[styles.badge, styles.badgeDont]}>DON'TS</Text>
           </View>
           <View style={styles.placeholderImage}>
-            <AppIcon name="close-circle" size={48} color={Colors.textSecondary} />
+            <AppIcon name="close-circle" size={48} color={Colors.accent} />
           </View>
           <Text style={styles.imageCaption}>
             Kain terlipat, gelap, atau buram akan menurunkan akurasi AI.
@@ -93,10 +94,10 @@ export default function HelpScreen() {
           </View>
         </View>
 
-        {/* Technical Section */}
+        {/* Informasi Teknis */}
         <View style={styles.section}>
           <Text style={styles.techTitle}>Informasi Teknis</Text>
-          
+
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Versi aplikasi</Text>
             <Text style={styles.infoValue}>{appVersion}</Text>
@@ -112,12 +113,12 @@ export default function HelpScreen() {
             disabled={!API_BASE_URL || isLoading}
           >
             {isLoading ? (
-              <ActivityIndicator color={Colors.textOnPrimary} size="small" />
+              <ActivityIndicator color={Colors.onPrimaryButton} size="small" />
             ) : (
               <AppIcon
                 name="globe-outline"
                 size={18}
-                color={!API_BASE_URL ? Colors.textSecondary : Colors.textOnPrimary}
+                color={!API_BASE_URL ? Colors.textSecondary : Colors.onPrimaryButton}
               />
             )}
             <Text
@@ -182,32 +183,26 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   scrollContent: {
-    padding: 20,
+    padding: 20, // TODO: Diukur dari help.png
     paddingBottom: 40,
   },
   header: {
-    marginBottom: 24,
+    marginBottom: 32, // TODO: Diukur dari help.png
   },
   headerLabel: {
-    fontSize: 12,
-    color: Colors.accent,
-    fontWeight: '600',
-    letterSpacing: 1,
+    ...Typography.tabLabelInactive,
+    color: Colors.tabInactive,
     marginBottom: 4,
-    // TODO: Typography token
   },
   title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: Colors.text,
+    ...Typography.screenTitle,
+    color: Colors.textPrimary,
     marginBottom: 8,
-    // TODO: Typography token
   },
   subtitle: {
-    fontSize: 16,
+    ...Typography.metadata,
     color: Colors.textSecondary,
     lineHeight: 22,
-    // TODO: Typography token
   },
   section: {
     marginBottom: 24,
@@ -219,10 +214,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionLabel: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: Colors.text,
-    // TODO: Typography token
+    ...Typography.cardTitle,
+    color: Colors.textPrimary,
   },
   badge: {
     fontSize: 12,
@@ -237,7 +230,7 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
   placeholderImage: {
-    height: 200,
+    height: 200, // TODO: Diukur dari help.png
     backgroundColor: Colors.surfaceElevated,
     borderRadius: 16,
     alignItems: 'center',
@@ -245,17 +238,15 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   imageCaption: {
-    fontSize: 14,
+    ...Typography.metadata,
     color: Colors.textSecondary,
     lineHeight: 20,
-    // TODO: Typography token
   },
   rulesTitle: {
+    ...Typography.cardTitle,
     fontSize: 18,
-    fontWeight: 'bold',
-    color: Colors.text,
+    color: Colors.textPrimary,
     marginBottom: 12,
-    // TODO: Typography token
   },
   rule: {
     flexDirection: 'row',
@@ -277,18 +268,15 @@ const styles = StyleSheet.create({
     color: Colors.accent,
   },
   ruleText: {
-    flex: 1,
-    fontSize: 14,
-    color: Colors.text,
+    ...Typography.cardBody,
+    color: Colors.textPrimary,
     lineHeight: 20,
-    // TODO: Typography token
   },
   techTitle: {
+    ...Typography.cardTitle,
     fontSize: 18,
-    fontWeight: 'bold',
-    color: Colors.text,
+    color: Colors.textPrimary,
     marginBottom: 12,
-    // TODO: Typography token
   },
   infoRow: {
     flexDirection: 'row',
@@ -300,19 +288,18 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   infoLabel: {
-    fontSize: 14,
+    ...Typography.metadata,
     color: Colors.textSecondary,
-    // TODO: Typography token
   },
   infoValue: {
-    fontSize: 14,
+    ...Typography.buttonLabel,
+    color: Colors.textPrimary,
     fontWeight: '600',
-    color: Colors.text,
   },
   healthButton: {
     flexDirection: 'row',
-    backgroundColor: Colors.primary,
-    borderRadius: 12,
+    backgroundColor: Colors.primaryButton,
+    borderRadius: 12, // TODO: Diukur dari help.png
     paddingVertical: 14,
     paddingHorizontal: 16,
     alignItems: 'center',
@@ -327,9 +314,8 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   healthButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.textOnPrimary,
+    ...Typography.buttonLabel,
+    color: Colors.onPrimaryButton,
     marginLeft: 8,
   },
   healthButtonTextDisabled: {
@@ -354,21 +340,20 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
   },
   statusText: {
-    fontSize: 14,
-    color: Colors.text,
+    ...Typography.metadata,
+    color: Colors.textPrimary,
     marginLeft: 8,
     fontWeight: '500',
   },
   statusError: {
-    fontSize: 14,
+    ...Typography.metadata,
     color: Colors.textSecondary,
     marginLeft: 8,
     fontWeight: '500',
   },
   helpText: {
-    fontSize: 13,
-    color: Colors.textSecondary,
-    lineHeight: 18,
+    ...Typography.metadata,
     fontStyle: 'italic',
+    color: Colors.textSecondary,
   },
 });

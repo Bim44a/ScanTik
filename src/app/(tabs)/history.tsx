@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { Colors } from '@/theme/colors';
+import { Typography } from '@/theme/typography';
 
 export default function HistoryScreen() {
   return (
@@ -18,10 +19,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   title: {
-    fontSize: 24,
-    color: Colors.text,
-    fontWeight: 'bold',
-    // TODO: Use design tokens for typography
+    ...Typography.screenTitle,
+    color: Colors.textPrimary,
   },
   placeholder: {
     color: Colors.textSecondary,

@@ -1,5 +1,7 @@
 import { Tabs } from 'expo-router';
+import { Text } from 'react-native';
 import { Colors } from '@/theme/colors';
+import { Typography } from '@/theme/typography';
 import AppIcon from '@/components/AppIcon';
 
 export default function TabLayout() {
@@ -7,12 +9,25 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: Colors.accent,
-        tabBarInactiveTintColor: Colors.textSecondary,
+        tabBarActiveTintColor: Colors.tabActive,
+        tabBarInactiveTintColor: Colors.tabInactive,
         tabBarStyle: {
           backgroundColor: Colors.background,
           borderTopColor: Colors.border,
+          height: 60,
+          paddingBottom: 8,
+          paddingTop: 8,
         },
+        tabBarLabel: ({ focused, color, children }) => (
+          <Text
+            style={{
+              color,
+              ...(focused ? Typography.tabLabelActive : Typography.tabLabelInactive),
+            }}
+          >
+            {children}
+          </Text>
+        ),
       }}
     >
       <Tabs.Screen

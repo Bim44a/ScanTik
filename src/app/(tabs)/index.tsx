@@ -13,6 +13,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import AppIcon from '@/components/AppIcon';
 import { Colors } from '@/theme/colors';
+import { Typography } from '@/theme/typography';
 import { API_BASE_URL } from '@/config/api';
 import { prepareImage } from '@/services/image';
 import { predictImage, PredictResult } from '@/services/predict';
@@ -103,9 +104,6 @@ export default function ScannerScreen() {
         <View style={styles.header}>
           <Text style={styles.welcome}>Selamat datang,</Text>
           <Text style={styles.title}>ScanTik</Text>
-          <Text style={styles.subtitle}>
-            Unggah foto kain batik untuk mengenali motifnya.
-          </Text>
         </View>
 
         {/* Kartu unggah */}
@@ -131,9 +129,9 @@ export default function ScannerScreen() {
           disabled={isLoading}
         >
           {isLoading ? (
-            <ActivityIndicator color={Colors.textOnPrimary} size="small" />
+            <ActivityIndicator color={Colors.onPrimaryButton} size="small" />
           ) : (
-            <AppIcon name="images-outline" size={20} color={Colors.textOnPrimary} />
+            <AppIcon name="images-outline" size={20} color={Colors.onPrimaryButton} />
           )}
           <Text style={styles.primaryButtonText}>
             {isLoading ? 'Menghubungkan ke Server...' : 'Pilih dari Galeri'}
@@ -157,62 +155,50 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   scrollContent: {
-    paddingHorizontal: 24,
-    paddingTop: 32,
+    paddingHorizontal: 24, // TODO: Diukur dari scanner.png
+    paddingTop: 32,        // TODO: Diukur dari scanner.png
     paddingBottom: 48,
   },
   header: {
-    marginBottom: 40,
+    marginBottom: 32,      // TODO: Diukur dari scanner.png
   },
   welcome: {
-    fontSize: 14,
+    ...Typography.greeting,
     color: Colors.textSecondary,
-    fontFamily: 'Inter_400Regular',
   },
   title: {
-    fontSize: 36,
-    color: Colors.text,
-    fontFamily: 'Inter_700Bold',
+    ...Typography.wordmark,
+    color: Colors.accent,
     marginTop: 4,
-    marginBottom: 12,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: Colors.textSecondary,
-    fontFamily: 'Inter_400Regular',
-    lineHeight: 24,
   },
   uploadCard: {
-    borderWidth: 2,
-    borderColor: Colors.border,
+    borderWidth: 1,        // Sesuai design-report.md: tebal 1 px
+    borderColor: Colors.primaryButton, // Sesuai design-report.md: #6B4423
     borderStyle: 'dashed',
-    borderRadius: 16,
-    padding: 40,
+    borderRadius: 16,      // TODO: Diukur dari scanner.png
+    padding: 32,           // TODO: Diukur dari scanner.png
     alignItems: 'center',
-    marginBottom: 32,
-    backgroundColor: Colors.surface,
+    marginBottom: 24,      // TODO: Diukur dari scanner.png
+    backgroundColor: Colors.surface, // #1D1814
   },
   uploadIconContainer: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
   uploadText: {
-    fontSize: 16,
-    color: Colors.text,
-    fontFamily: 'Inter_600SemiBold',
+    ...Typography.uploadInstruction,
+    color: Colors.textPrimary, // #F4EBD9
     textAlign: 'center',
     marginBottom: 8,
-    lineHeight: 24,
   },
   uploadHint: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    fontFamily: 'Inter_400Regular',
+    ...Typography.metadata,
+    color: Colors.textSecondary, // #A39893
   },
   primaryButton: {
     flexDirection: 'row',
-    backgroundColor: Colors.accent,
-    borderRadius: 12,
-    paddingVertical: 18,
+    backgroundColor: Colors.primaryButton, // #6B4423
+    borderRadius: 12,      // TODO: Diukur dari scanner.png
+    paddingVertical: 16,
     paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
@@ -223,20 +209,18 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   primaryButtonText: {
-    fontSize: 16,
-    color: Colors.textOnPrimary,
-    fontFamily: 'Inter_600SemiBold',
+    ...Typography.buttonLabel,
+    color: Colors.onPrimaryButton, // #FFFFFF
   },
   footer: {
-    marginTop: 32,
+    marginTop: 24,
     paddingHorizontal: 16,
   },
   footerText: {
-    fontSize: 12,
-    color: Colors.textTertiary,
-    fontFamily: 'Inter_400Regular',
+    ...Typography.metadata,
+    color: Colors.textSecondary,
     textAlign: 'center',
-    lineHeight: 16,
   },
 });
+
 

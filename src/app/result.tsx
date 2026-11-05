@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Colors } from '@/theme/colors';
+import { Typography } from '@/theme/typography';
 import AppIcon from '@/components/AppIcon';
 
 /**
@@ -84,7 +85,7 @@ export default function ResultScreen() {
           />
           <View style={styles.overlay}>
             {predicted_class === 'Negatif' ? (
-              <AppIcon name="warning" size={32} color={Colors.textOnPrimary} />
+              <AppIcon name="warning" size={32} color={Colors.onPrimaryButton} />
             ) : (
               <AppIcon name="checkmark-circle" size={32} color={Colors.accent} />
             )}
@@ -96,7 +97,7 @@ export default function ResultScreen() {
           {predicted_class === 'Negatif' ? (
             <>
               <View style={[styles.statusBadge, styles.statusBadgeNegatif]}>
-                <AppIcon name="close-circle" size={16} color={Colors.textOnPrimary} />
+                <AppIcon name="close-circle" size={16} color={Colors.onPrimaryButton} />
                 <Text style={styles.statusBadgeText}>Tidak dikenali</Text>
               </View>
               <Text style={styles.classNameTitle}>Motif tidak dikenali</Text>
@@ -108,7 +109,7 @@ export default function ResultScreen() {
           ) : (
             <>
               <View style={[styles.statusBadge, styles.statusBadgeSuccess]}>
-                <AppIcon name="checkmark-circle" size={16} color={Colors.textOnPrimary} />
+                <AppIcon name="checkmark-circle" size={16} color={Colors.onPrimaryButton} />
                 <Text style={styles.statusBadgeText}>Dikenali</Text>
               </View>
               <Text style={styles.classNameTitle}>{motif_details.name}</Text>
@@ -117,7 +118,7 @@ export default function ResultScreen() {
               </Text>
               {confidence_score < 60 && (
                 <View style={styles.warningBox}>
-                  <AppIcon name="alert-circle-outline" size={20} color={Colors.warning} />
+                  <AppIcon name="alert-circle-outline" size={20} color={Colors.accent} />
                   <Text style={styles.warningText}>
                     Tingkat kemiripan rendah. Pastikan foto mengikuti panduan di Tab Bantuan.
                   </Text>
@@ -166,7 +167,7 @@ export default function ResultScreen() {
 
         {/* Tombol aksi */}
         <Pressable style={styles.actionButton} onPress={handleScanAgain}>
-          <AppIcon name="share" size={20} color={Colors.textOnPrimary} />
+          <AppIcon name="share" size={20} color={Colors.onPrimaryButton} />
           <Text style={styles.actionButtonText}>Pindai Lagi</Text>
         </Pressable>
       </ScrollView>
@@ -194,16 +195,14 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   sectionLabel: {
-    fontSize: 12,
+    ...Typography.tabLabelInactive,
     color: Colors.accent,
-    fontFamily: 'Inter_600SemiBold',
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
   subtitle: {
-    fontSize: 16,
+    ...Typography.metadata,
     color: Colors.textSecondary,
-    fontFamily: 'Inter_400Regular',
     marginTop: 4,
   },
   imageContainer: {
@@ -251,26 +250,23 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.textSecondary,
   },
   statusBadgeText: {
-    color: Colors.textOnPrimary,
-    fontFamily: 'Inter_600SemiBold',
-    fontSize: 12,
+    color: Colors.onPrimaryButton,
+    ...Typography.metadata,
   },
   classNameTitle: {
-    fontSize: 24,
-    color: Colors.text,
-    fontFamily: 'Inter_700Bold',
+    ...Typography.screenTitle,
+    color: Colors.textPrimary,
     marginBottom: 8,
   },
   confidenceText: {
+    ...Typography.cardTitle,
     fontSize: 18,
     color: Colors.accent,
-    fontFamily: 'Inter_700Bold',
     marginBottom: 16,
   },
   explanationText: {
-    fontSize: 14,
-    color: Colors.text,
-    fontFamily: 'Inter_400Regular',
+    ...Typography.cardBody,
+    color: Colors.textPrimary,
     lineHeight: 22,
   },
   warningBox: {
@@ -283,9 +279,8 @@ const styles = StyleSheet.create({
   },
   warningText: {
     flex: 1,
-    fontSize: 14,
-    color: Colors.warning,
-    fontFamily: 'Inter_400Regular',
+    ...Typography.cardBody,
+    color: Colors.accent,
     lineHeight: 20,
   },
   detailsGrid: {
@@ -300,21 +295,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   detailLabel: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-    fontFamily: 'Inter_600SemiBold',
+    ...Typography.cardTitle,
+    color: Colors.accent,
     textTransform: 'uppercase',
     marginBottom: 4,
   },
   detailValue: {
-    fontSize: 14,
-    color: Colors.text,
-    fontFamily: 'Inter_400Regular',
+    ...Typography.cardBody,
+    color: Colors.textPrimary,
     lineHeight: 20,
   },
   actionButton: {
     flexDirection: 'row',
-    backgroundColor: Colors.accent,
+    backgroundColor: Colors.primaryButton,
     borderRadius: 12,
     paddingVertical: 18,
     paddingHorizontal: 24,
@@ -324,14 +317,12 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   actionButtonText: {
-    fontSize: 16,
-    color: Colors.textOnPrimary,
-    fontFamily: 'Inter_600SemiBold',
+    ...Typography.buttonLabel,
+    color: Colors.onPrimaryButton,
   },
   errorText: {
-    fontSize: 16,
+    ...Typography.cardBody,
     color: Colors.textSecondary,
-    fontFamily: 'Inter_400Regular',
     marginTop: 16,
   },
   retryButton: {
@@ -342,8 +333,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   retryButtonText: {
-    fontSize: 14,
+    ...Typography.buttonLabel,
     color: Colors.accent,
-    fontFamily: 'Inter_600SemiBold',
   },
 });

@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import AppIcon from '@/components/AppIcon';
 import { Colors } from '@/theme/colors';
+import { Typography } from '@/theme/typography';
 import { MOTIFS, Motif } from '@/data/motifs';
 
 export default function CatalogScreen() {
@@ -30,7 +31,7 @@ export default function CatalogScreen() {
       onPress={() => setSelectedMotif(item)}
     >
       <View style={styles.placeholderImage}>
-        <AppIcon name="image-outline" size={32} color={Colors.accentMuted} />
+        <AppIcon name="image-outline" size={32} color={Colors.accent} />
       </View>
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle}>{item.name}</Text>
@@ -114,28 +115,26 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   header: {
-    padding: 20,
+    padding: 20, // TODO: Diukur dari katalog.png
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: Colors.text,
+    ...Typography.screenTitle,
+    color: Colors.textPrimary,
     marginBottom: 16,
-    // TODO: Typography token
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surfaceElevated,
-    borderRadius: 12,
+    borderRadius: 12, // TODO: Diukur dari katalog.png
     paddingHorizontal: 12,
     height: 48,
   },
   searchInput: {
     flex: 1,
-    color: Colors.text,
+    color: Colors.textPrimary,
     marginLeft: 8,
-    fontSize: 16,
+    fontSize: 16, // TODO: Gunakan typography token untuk body text
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -144,13 +143,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: 16,
-    color: Colors.text,
-    fontWeight: '600',
+    ...Typography.cardTitle,
+    color: Colors.textPrimary,
     marginRight: 8,
   },
   sectionCount: {
-    fontSize: 14,
+    ...Typography.metadata,
     color: Colors.textSecondary,
     backgroundColor: Colors.surface,
     paddingHorizontal: 8,
@@ -164,8 +162,8 @@ const styles = StyleSheet.create({
   },
   card: {
     flexDirection: 'row',
-    backgroundColor: Colors.surface,
-    borderRadius: 16,
+    backgroundColor: Colors.surfaceElevated, // #241F1C sesuai design-report.md
+    borderRadius: 16, // TODO: Diukur dari katalog.png
     marginBottom: 12,
     overflow: 'hidden',
     borderWidth: 1,
@@ -174,7 +172,7 @@ const styles = StyleSheet.create({
   placeholderImage: {
     width: 100,
     height: 100,
-    backgroundColor: Colors.surfaceElevated,
+    backgroundColor: Colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -184,15 +182,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   cardTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: Colors.text,
+    ...Typography.cardTitle,
+    color: Colors.textPrimary,
     marginBottom: 4,
   },
   cardSubtitle: {
-    fontSize: 14,
+    ...Typography.cardBody,
     color: Colors.textSecondary,
-    lineHeight: 18,
   },
   emptyContainer: {
     paddingTop: 100,
@@ -200,7 +196,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     color: Colors.textSecondary,
-    fontSize: 16,
+    fontSize: 16, // TODO: Gunakan typography token
   },
   modalOverlay: {
     flex: 1,
@@ -208,7 +204,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.surfaceElevated,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '80%',
@@ -218,35 +214,31 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   modalTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: Colors.text,
+    ...Typography.screenTitle,
+    color: Colors.textPrimary,
     marginBottom: 20,
   },
   label: {
-    fontSize: 14,
+    ...Typography.cardTitle,
     color: Colors.accent,
-    fontWeight: 'bold',
     marginTop: 16,
     textTransform: 'uppercase',
   },
   value: {
-    fontSize: 16,
-    color: Colors.text,
+    ...Typography.cardBody,
+    color: Colors.textPrimary,
     marginTop: 4,
-    lineHeight: 22,
   },
   closeButton: {
-    backgroundColor: Colors.primary,
-    borderRadius: 12,
+    backgroundColor: Colors.primaryButton,
+    borderRadius: 12, // TODO: Diukur dari katalog.png
     height: 50,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 20,
   },
   closeButtonText: {
-    color: Colors.textOnPrimary,
-    fontSize: 16,
-    fontWeight: 'bold',
+    ...Typography.buttonLabel,
+    color: Colors.onPrimaryButton,
   },
 });
