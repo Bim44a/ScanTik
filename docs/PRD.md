@@ -447,5 +447,5 @@ Satu milestone per sesi. Setiap milestone diakhiri laporan (Bagian 0.2) dan **be
   dengan satu ikon expo-symbols netral. Tanpa gambar dari internet.
 - Foto uji untuk demo disediakan pemilik, bukan fitur aplikasi.
 - Teks motif di Bagian 7 final untuk implementasi.
-- Bahan visual: docs/design/*.png dan docs/design/tokens.md.
+- Bahan visual: docs/design/design-report.md (utama) dan docs/design/*.png.
   Jika bertentangan dengan tebakan agent, bahan ini yang berlaku.
