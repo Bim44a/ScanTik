@@ -10,7 +10,7 @@ import {
   ScrollView,
   SafeAreaView,
 } from 'react-native';
-import { SymbolView } from 'expo-symbols';
+import AppIcon from '@/components/AppIcon';
 import { Colors } from '@/theme/colors';
 import { MOTIFS, Motif } from '@/data/motifs';
 
@@ -30,7 +30,7 @@ export default function CatalogScreen() {
       onPress={() => setSelectedMotif(item)}
     >
       <View style={styles.placeholderImage}>
-        <SymbolView name="leaf.fill" size={32} tintColor={Colors.accentMuted} />
+        <AppIcon name="image-outline" size={32} color={Colors.accentMuted} />
       </View>
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle}>{item.name}</Text>
@@ -46,7 +46,7 @@ export default function CatalogScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Katalog Motif</Text>
         <View style={styles.searchContainer}>
-          <SymbolView name="magnifyingglass" size={20} tintColor={Colors.textSecondary} />
+          <AppIcon name="search" size={20} color={Colors.textSecondary} />
           <TextInput
             style={styles.searchInput}
             placeholder="Cari motif batik..."

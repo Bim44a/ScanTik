@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import { Colors } from '@/theme/colors';
+import AppIcon from '@/components/AppIcon';
 
 export default function TabLayout() {
   return (
@@ -20,7 +20,7 @@ export default function TabLayout() {
         options={{
           title: 'Scanner',
           tabBarIcon: ({ color }) => (
-            <SymbolView name="viewfinder" size={24} tintColor={color} />
+            <AppIcon name={color === Colors.accent ? 'scan' : 'scan-outline'} size={24} color={String(color ?? Colors.textSecondary)} />
           ),
         }}
       />
@@ -29,7 +29,7 @@ export default function TabLayout() {
         options={{
           title: 'Katalog',
           tabBarIcon: ({ color }) => (
-            <SymbolView name="book" size={24} tintColor={color} />
+            <AppIcon name={color === Colors.accent ? 'book' : 'book-outline'} size={24} color={String(color ?? Colors.textSecondary)} />
           ),
         }}
       />
@@ -38,7 +38,7 @@ export default function TabLayout() {
         options={{
           title: 'Riwayat',
           tabBarIcon: ({ color }) => (
-            <SymbolView name="clock" size={24} tintColor={color} />
+            <AppIcon name={color === Colors.accent ? 'time' : 'time-outline'} size={24} color={String(color ?? Colors.textSecondary)} />
           ),
         }}
       />
@@ -47,7 +47,7 @@ export default function TabLayout() {
         options={{
           title: 'Help',
           tabBarIcon: ({ color }) => (
-            <SymbolView name="questionmark.circle" size={24} tintColor={color} />
+            <AppIcon name={color === Colors.accent ? 'help-circle' : 'help-circle-outline'} size={24} color={String(color ?? Colors.textSecondary)} />
           ),
         }}
       />

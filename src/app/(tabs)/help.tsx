@@ -8,11 +8,11 @@ import {
   ActivityIndicator,
   SafeAreaView,
 } from 'react-native';
-import { SymbolView } from 'expo-symbols';
 import Constants from 'expo-constants';
 import { Colors } from '@/theme/colors';
 import { API_BASE_URL } from '@/config/api';
 import { checkHealth, HealthCheckResult } from '@/services/health';
+import AppIcon from '@/components/AppIcon';
 
 export default function HelpScreen() {
   const [healthResult, setHealthResult] = useState<HealthCheckResult | null>(null);
@@ -45,7 +45,7 @@ export default function HelpScreen() {
             <Text style={styles.badge}>DO'S</Text>
           </View>
           <View style={styles.placeholderImage}>
-            <SymbolView name="checkmark.circle.fill" size={48} tintColor={Colors.accent} />
+            <AppIcon name="checkmark-circle" size={48} color={Colors.accent} />
           </View>
           <Text style={styles.imageCaption}>
             Kain rata, cahaya terang, dan motif terlihat jelas.
@@ -59,7 +59,7 @@ export default function HelpScreen() {
             <Text style={[styles.badge, styles.badgeDont]}>DON'TS</Text>
           </View>
           <View style={styles.placeholderImage}>
-            <SymbolView name="xmark.circle.fill" size={48} tintColor={Colors.textSecondary} />
+            <AppIcon name="close-circle" size={48} color={Colors.textSecondary} />
           </View>
           <Text style={styles.imageCaption}>
             Kain terlipat, gelap, atau buram akan menurunkan akurasi AI.
@@ -114,10 +114,10 @@ export default function HelpScreen() {
             {isLoading ? (
               <ActivityIndicator color={Colors.textOnPrimary} size="small" />
             ) : (
-              <SymbolView
-                name="network"
+              <AppIcon
+                name="globe-outline"
                 size={18}
-                tintColor={!API_BASE_URL ? Colors.textSecondary : Colors.textOnPrimary}
+                color={!API_BASE_URL ? Colors.textSecondary : Colors.textOnPrimary}
               />
             )}
             <Text
@@ -145,19 +145,19 @@ export default function HelpScreen() {
             >
               {healthResult.ok ? (
                 <>
-                  <SymbolView
-                    name="checkmark.circle.fill"
+                  <AppIcon
+                    name="checkmark-circle"
                     size={20}
-                    tintColor={Colors.accent}
+                    color={Colors.accent}
                   />
                   <Text style={styles.statusText}>Server terhubung</Text>
                 </>
               ) : (
                 <>
-                  <SymbolView
-                    name="xmark.circle.fill"
+                  <AppIcon
+                    name="close-circle"
                     size={20}
-                    tintColor={Colors.textSecondary}
+                    color={Colors.textSecondary}
                   />
                   <Text style={styles.statusError}>{healthResult.message}</Text>
                 </>
