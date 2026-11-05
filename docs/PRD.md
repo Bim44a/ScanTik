@@ -439,3 +439,13 @@ Satu milestone per sesi. Setiap milestone diakhiri laporan (Bagian 0.2) dan **be
 - Jangan mengunduh gambar dari internet.
 - Jangan menambah fitur, halaman, atau dependensi di luar dokumen ini tanpa persetujuan tertulis pemilik.
 - Jangan melanjutkan ke milestone berikutnya tanpa perintah.
+
+## 17. Keputusan Pemilik (Berlaku sebagai Bagian PRD)
+
+- Ikon profil di Scanner **dihapus**.
+- Placeholder gambar motif dan Help: kotak berwarna permukaan gelap dari tema
+  dengan satu ikon expo-symbols netral. Tanpa gambar dari internet.
+- Foto uji untuk demo disediakan pemilik, bukan fitur aplikasi.
+- Teks motif di Bagian 7 final untuk implementasi.
+- Bahan visual: docs/design/*.png dan docs/design/tokens.md.
+  Jika bertentangan dengan tebakan agent, bahan ini yang berlaku.
