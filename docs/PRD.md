@@ -108,7 +108,7 @@ Dokumen ini adalah **satu-satunya sumber kebenaran**. Jika ada konflik antara do
 | Kompres foto | `expo-image-manipulator` |
 | Salin berkas | `expo-file-system` (API SDK 58; baca dokumentasinya) |
 | HTTP | `fetch` bawaan dengan `AbortController` (tanpa axios) |
-| Ikon | `expo-symbols` / ikon sesuai Figma; jangan menambah pustaka ikon baru tanpa persetujuan |
+| Ikon | `@expo/vector-icons` (hanya Ionicons). `expo-symbols` tidak dipakai untuk ikon baru |
 
 Paket bawaan template (`expo-glass-effect`, `@expo/ui`, dan sejenisnya) boleh dibiarkan, tetapi **tidak boleh dipakai** kecuali dibutuhkan desain.
 
