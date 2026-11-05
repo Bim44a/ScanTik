@@ -10,4 +10,6 @@ export const Colors = {
   text: '#F4EBD9',       // Teks utama krem
   textOnPrimary: '#FFFFFF', // Teks di atas tombol
   textSecondary: '#A39893', // Teks sekunder dan ikon tab nonaktif
+  textTertiary: '#736B67', // Teks sangat sekunder
+  warning: '#D97706',    // Warna peringatan
 };
