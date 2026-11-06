@@ -69,17 +69,20 @@ export default function HistoryScreen() {
 
     const dateOnly = (d: Date) => d.toDateString();
 
+    const hour = String(date.getHours()).padStart(2, '0');
+    const minute = String(date.getMinutes()).padStart(2, '0');
+    const time = `${hour}:${minute}`;
+
     if (dateOnly(date) === dateOnly(today)) {
       // Hari ini
-      return `Hari ini, ${date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`;
+      return `Hari ini, ${time}`;
     } else if (dateOnly(date) === dateOnly(yesterday)) {
       // Kemarin
-      return `Kemarin, ${date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`;
+      return `Kemarin, ${time}`;
     } else {
       // Tanggal lain
       const day = String(date.getDate()).padStart(2, '0');
       const month = date.toLocaleString('id-ID', { month: 'short' });
-      const time = date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
       return `${day} ${month}, ${time}`;
     }
   };
