@@ -14,20 +14,20 @@ import { Colors } from '@/theme/colors';
 import { Typography } from '@/theme/typography';
 import AppIcon from '@/components/AppIcon';
 
-/**
- * TODO M4b: Tampilan final dengan tema motif, skor, makna, tombol aksi lengkap.
- * M4a: Layar sementara menampilkan thumbnail, predicted_class, dan confidence_score mentah.
- */
 export default function ResultScreen() {
   const { imageUri, resultData } = useLocalSearchParams();
   const [data, setData] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(true);
 
   useEffect(() => {
-    if (resultData) {
+    if (resultData && imageUri) {
       try {
         const parsed = JSON.parse(String(resultData));
-        setData(parsed);
+        if (parsed && parsed.predicted_class && typeof parsed.confidence_score === 'number') {
+          setData(parsed);
+        } else {
+          setData(null);
+        }
       } catch (error) {
         console.error('Failed to parse result data:', error);
         setData(null);
@@ -37,10 +37,14 @@ export default function ResultScreen() {
     } else {
       setIsProcessing(false);
     }
-  }, [resultData]);
+  }, [resultData, imageUri]);
 
   const handleScanAgain = () => {
     router.replace('/(tabs)');
+  };
+
+  const handleOpenHelp = () => {
+    router.replace('/(tabs)/help');
   };
 
   if (isProcessing) {
@@ -51,125 +55,121 @@ export default function ResultScreen() {
     );
   }
 
+  // Parameter hilang atau parsing gagal
   if (!data || !imageUri) {
     return (
       <SafeAreaView style={styles.centerContainer}>
-        <AppIcon name="alert-circle" size={64} color={Colors.textSecondary} />
-        <Text style={styles.errorText}>Data hasil tidak valid</Text>
-        <Pressable style={styles.retryButton} onPress={handleScanAgain}>
-          <Text style={styles.retryButtonText}>Pindai Lagi</Text>
+        <AppIcon name="alert-circle-outline" size={64} color={Colors.accent} />
+        <Text style={styles.errorText}>Hasil tidak tersedia.</Text>
+        <Pressable style={styles.primaryButton} onPress={handleScanAgain}>
+          <Text style={styles.primaryButtonText}>Kembali ke Pemindai</Text>
         </Pressable>
       </SafeAreaView>
     );
   }
 
   const { predicted_class, confidence_score, motif_details } = data;
+  const isUnrecognized = predicted_class === 'Negatif';
+  const isLowConfidence = !isUnrecognized && confidence_score < 60;
 
-  // Format skor ke 1 desimal
-  const formattedScore = confidence_score.toFixed(1);
+  // Format skor ke 1 desimal dengan KOMA (contoh: 94,9%)
+  const formattedScore = confidence_score.toFixed(1).replace('.', ',');
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <Text style={styles.sectionLabel}>HASIL PEMINDAIAN</Text>
-          <Text style={styles.subtitle}>Hasil identifikasi motif batik</Text>
-        </View>
-
-        {/* Thumbnail */}
+        {/* Thumbnail foto */}
         <View style={styles.imageContainer}>
           <Image
             source={{ uri: String(imageUri) }}
             style={styles.thumbnail}
             resizeMode="cover"
           />
-          <View style={styles.overlay}>
-            {predicted_class === 'Negatif' ? (
-              <AppIcon name="warning" size={32} color={Colors.onPrimaryButton} />
-            ) : (
-              <AppIcon name="checkmark-circle" size={32} color={Colors.accent} />
-            )}
-          </View>
         </View>
 
-        {/* Info utama */}
-        <View style={styles.infoCard}>
-          {predicted_class === 'Negatif' ? (
-            <>
-              <View style={[styles.statusBadge, styles.statusBadgeNegatif]}>
-                <AppIcon name="close-circle" size={16} color={Colors.onPrimaryButton} />
-                <Text style={styles.statusBadgeText}>Tidak dikenali</Text>
-              </View>
-              <Text style={styles.classNameTitle}>Motif tidak dikenali</Text>
-              <Text style={styles.explanationText}>
-                Foto tidak cocok dengan salah satu dari 6 motif batik yang dikenali:
-                Buketan, Jlamprang, Liong, Mega Mendung, Singa Barong, dan Tujuh Rupa.
-              </Text>
-            </>
-          ) : (
-            <>
-              <View style={[styles.statusBadge, styles.statusBadgeSuccess]}>
-                <AppIcon name="checkmark-circle" size={16} color={Colors.onPrimaryButton} />
-                <Text style={styles.statusBadgeText}>Dikenali</Text>
-              </View>
-              <Text style={styles.classNameTitle}>{motif_details.name}</Text>
-              <Text style={styles.confidenceText}>
-                Kecocokan {formattedScore}%
-              </Text>
-              {confidence_score < 60 && (
-                <View style={styles.warningBox}>
-                  <AppIcon name="alert-circle-outline" size={20} color={Colors.accent} />
-                  <Text style={styles.warningText}>
-                    Tingkat kemiripan rendah. Pastikan foto mengikuti panduan di Tab Bantuan.
-                  </Text>
-                </View>
-              )}
-            </>
-          )}
+        {/* Kondisi 3: TIDAK DIKENALI */}
+        {isUnrecognized ? (
+          <View style={styles.card}>
+            <Text style={styles.unrecognizedTitle}>Motif tidak dikenali</Text>
+            <Text style={styles.unrecognizedText}>
+              Motif ini belum termasuk 6 motif yang dikenali aplikasi.
+            </Text>
 
-          {/* Detail motif */}
-          {predicted_class !== 'Negatif' && motif_details && (
-            <View style={styles.detailsGrid}>
-              {motif_details.origin && (
-                <View style={styles.detailRow}>
-                  <AppIcon name="location" size={20} color={Colors.accent} />
-                  <View style={styles.detailContent}>
+            <View style={styles.buttonGroup}>
+              <Pressable style={styles.secondaryButton} onPress={handleOpenHelp}>
+                <AppIcon name="help-circle-outline" size={20} color={Colors.accent} />
+                <Text style={styles.secondaryButtonText}>Buka Panduan Foto</Text>
+              </Pressable>
+              <Pressable style={styles.primaryButton} onPress={handleScanAgain}>
+                <AppIcon name="scan-outline" size={20} color={Colors.onPrimaryButton} />
+                <Text style={styles.primaryButtonText}>Pindai Lagi</Text>
+              </Pressable>
+            </View>
+          </View>
+        ) : (
+          /* Kondisi 1 & 2: DIKENALI */
+          <View style={styles.card}>
+            {/* Lencana Kecocokan */}
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>Kecocokan {formattedScore}%</Text>
+            </View>
+
+            {/* Nama Motif */}
+            <Text style={styles.motifTitle}>
+              {motif_details?.name || predicted_class}
+            </Text>
+
+            {/* Kondisi 2: Peringatan Skor < 60 */}
+            {isLowConfidence && (
+              <View style={styles.warningCard}>
+                <AppIcon name="alert-circle-outline" size={24} color={Colors.accent} />
+                <Text style={styles.warningText}>
+                  Tingkat kemiripan rendah. Pastikan foto mengikuti panduan di Tab Bantuan.
+                </Text>
+              </View>
+            )}
+
+            {/* Detail Motif (Asal, Filosofi, Ciri) */}
+            {motif_details && (
+              <View style={styles.detailsContainer}>
+                {motif_details.origin ? (
+                  <View style={styles.detailSection}>
                     <Text style={styles.detailLabel}>Asal</Text>
                     <Text style={styles.detailValue}>{motif_details.origin}</Text>
                   </View>
-                </View>
-              )}
-              {motif_details.philosophy && (
-                <View style={styles.detailRow}>
-                  <AppIcon name="heart" size={20} color={Colors.accent} />
-                  <View style={styles.detailContent}>
-                    <Text style={styles.detailLabel}>Filosofi</Text>
-                    <Text style={styles.detailValue} numberOfLines={3}>
-                      {motif_details.philosophy}
-                    </Text>
-                  </View>
-                </View>
-              )}
-              {motif_details.characteristics && (
-                <View style={styles.detailRow}>
-                  <AppIcon name="grid" size={20} color={Colors.accent} />
-                  <View style={styles.detailContent}>
-                    <Text style={styles.detailLabel}>Ciri</Text>
-                    <Text style={styles.detailValue} numberOfLines={3}>
-                      {motif_details.characteristics}
-                    </Text>
-                  </View>
-                </View>
-              )}
-            </View>
-          )}
-        </View>
+                ) : null}
 
-        {/* Tombol aksi */}
-        <Pressable style={styles.actionButton} onPress={handleScanAgain}>
-          <AppIcon name="share" size={20} color={Colors.onPrimaryButton} />
-          <Text style={styles.actionButtonText}>Pindai Lagi</Text>
-        </Pressable>
+                {motif_details.philosophy ? (
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>Filosofi</Text>
+                    <Text style={styles.detailValue}>{motif_details.philosophy}</Text>
+                  </View>
+                ) : null}
+
+                {motif_details.characteristics ? (
+                  <View style={styles.detailSection}>
+                    <Text style={styles.detailLabel}>Ciri</Text>
+                    <Text style={styles.detailValue}>{motif_details.characteristics}</Text>
+                  </View>
+                ) : null}
+              </View>
+            )}
+
+            {/* Tombol Aksi */}
+            <View style={styles.buttonGroup}>
+              {isLowConfidence && (
+                <Pressable style={styles.secondaryButton} onPress={handleOpenHelp}>
+                  <AppIcon name="help-circle-outline" size={20} color={Colors.accent} />
+                  <Text style={styles.secondaryButtonText}>Buka Panduan Foto</Text>
+                </Pressable>
+              )}
+              <Pressable style={styles.primaryButton} onPress={handleScanAgain}>
+                <AppIcon name="scan-outline" size={20} color={Colors.onPrimaryButton} />
+                <Text style={styles.primaryButtonText}>Pindai Lagi</Text>
+              </Pressable>
+            </View>
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -181,159 +181,131 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   scrollContent: {
-    paddingHorizontal: 24,
-    paddingTop: 32,
-    paddingBottom: 48,
+    padding: 20,
+    gap: 20,
   },
   centerContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: Colors.background,
-  },
-  header: {
-    marginBottom: 32,
-  },
-  sectionLabel: {
-    ...Typography.tabLabelInactive,
-    color: Colors.accent,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  subtitle: {
-    ...Typography.metadata,
-    color: Colors.textSecondary,
-    marginTop: 4,
+    padding: 24,
+    gap: 16,
   },
   imageContainer: {
     width: '100%',
     aspectRatio: 1,
     borderRadius: 16,
     overflow: 'hidden',
-    marginBottom: 32,
     backgroundColor: Colors.surface,
   },
   thumbnail: {
     width: '100%',
     height: '100%',
   },
-  overlay: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  infoCard: {
+  card: {
     backgroundColor: Colors.surface,
     borderRadius: 16,
-    padding: 24,
-    marginBottom: 24,
+    padding: 20,
+    gap: 16,
   },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    width: 'fit-content',
-    marginBottom: 16,
-  },
-  statusBadgeSuccess: {
+  badge: {
+    alignSelf: 'flex-start',
     backgroundColor: Colors.accent,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
   },
-  statusBadgeNegatif: {
-    backgroundColor: Colors.textSecondary,
+  badgeText: {
+    ...Typography.badge,
+    color: Colors.onBadge,
   },
-  statusBadgeText: {
-    color: Colors.onPrimaryButton,
-    ...Typography.metadata,
-  },
-  classNameTitle: {
+  motifTitle: {
     ...Typography.screenTitle,
     color: Colors.textPrimary,
-    marginBottom: 8,
   },
-  confidenceText: {
-    ...Typography.cardTitle,
-    fontSize: 18,
-    color: Colors.accent,
-    marginBottom: 16,
-  },
-  explanationText: {
-    ...Typography.cardBody,
+  unrecognizedTitle: {
+    ...Typography.screenTitle,
     color: Colors.textPrimary,
-    lineHeight: 22,
   },
-  warningBox: {
+  unrecognizedText: {
+    ...Typography.cardBody,
+    color: Colors.textSecondary,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  warningCard: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 12,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.primaryButton,
     borderRadius: 12,
-    padding: 16,
-    marginTop: 16,
+    padding: 14,
   },
   warningText: {
     flex: 1,
     ...Typography.cardBody,
-    color: Colors.accent,
-    lineHeight: 20,
+    color: Colors.textPrimary,
+    lineHeight: 18,
   },
-  detailsGrid: {
-    gap: 24,
-    marginTop: 24,
-  },
-  detailRow: {
-    flexDirection: 'row',
+  detailsContainer: {
     gap: 16,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+    paddingTop: 16,
   },
-  detailContent: {
-    flex: 1,
+  detailSection: {
+    gap: 4,
   },
   detailLabel: {
     ...Typography.cardTitle,
     color: Colors.accent,
-    textTransform: 'uppercase',
-    marginBottom: 4,
   },
   detailValue: {
     ...Typography.cardBody,
     color: Colors.textPrimary,
     lineHeight: 20,
   },
-  actionButton: {
+  buttonGroup: {
+    gap: 12,
+    marginTop: 8,
+  },
+  primaryButton: {
     flexDirection: 'row',
-    backgroundColor: Colors.primaryButton,
-    borderRadius: 12,
-    paddingVertical: 18,
-    paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 12,
-    marginTop: 16,
+    backgroundColor: Colors.primaryButton,
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    gap: 8,
   },
-  actionButtonText: {
+  primaryButtonText: {
     ...Typography.buttonLabel,
     color: Colors.onPrimaryButton,
+  },
+  secondaryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    gap: 8,
+  },
+  secondaryButtonText: {
+    ...Typography.buttonLabel,
+    color: Colors.accent,
   },
   errorText: {
     ...Typography.cardBody,
     color: Colors.textSecondary,
-    marginTop: 16,
-  },
-  retryButton: {
-    marginTop: 24,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    backgroundColor: Colors.background,
-  },
-  retryButtonText: {
-    ...Typography.buttonLabel,
-    color: Colors.accent,
+    fontSize: 16,
+    textAlign: 'center',
   },
 });
