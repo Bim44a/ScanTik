@@ -17,6 +17,7 @@ import { Typography } from '@/theme/typography';
 import { API_BASE_URL } from '@/config/api';
 import { prepareImage } from '@/services/image';
 import { predictImage, PredictResult } from '@/services/predict';
+import { setScanSession } from '@/state/scanSession';
 
 export default function ScannerScreen() {
   const [isLoading, setIsLoading] = useState(false);
@@ -79,12 +80,15 @@ export default function ScannerScreen() {
         return;
       }
 
-      // Sukses, navigasi ke layar hasil
+      // Simpan ke session memori dengan ID unik
+      const sessionId = Date.now().toString();
+      setScanSession(sessionId, compressedUri, predictResult.data);
+
+      // Navigasi ke result HANYA dengan session ID
       router.push({
         pathname: '/result',
         params: {
-          imageUri: compressedUri,
-          resultData: JSON.stringify(predictResult.data),
+          sessionId: sessionId,
         },
       });
     } catch (error) {

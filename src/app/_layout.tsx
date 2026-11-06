@@ -45,7 +45,13 @@ export default function RootLayout() {
       }}
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="result" options={{ headerShown: true }} />
+      <Stack.Screen name="result" options={{ 
+        headerTitle: 'Hasil',
+        headerShown: true,
+        headerStyle: { backgroundColor: Colors.background },
+        headerTintColor: Colors.textPrimary,
+        headerTitleStyle: { fontFamily: 'Poppins_600SemiBold' },
+      }} />
     </Stack>
   );
 }

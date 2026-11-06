@@ -13,31 +13,20 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { Colors } from '@/theme/colors';
 import { Typography } from '@/theme/typography';
 import AppIcon from '@/components/AppIcon';
+import { getScanSession } from '@/state/scanSession';
 
 export default function ResultScreen() {
-  const { imageUri, resultData } = useLocalSearchParams();
-  const [data, setData] = useState<any>(null);
+  const { sessionId } = useLocalSearchParams();
+  const [session, setSession] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(true);
 
   useEffect(() => {
-    if (resultData && imageUri) {
-      try {
-        const parsed = JSON.parse(String(resultData));
-        if (parsed && parsed.predicted_class && typeof parsed.confidence_score === 'number') {
-          setData(parsed);
-        } else {
-          setData(null);
-        }
-      } catch (error) {
-        console.error('Failed to parse result data:', error);
-        setData(null);
-      } finally {
-        setIsProcessing(false);
-      }
-    } else {
-      setIsProcessing(false);
+    if (sessionId) {
+      const found = getScanSession(String(sessionId));
+      setSession(found);
     }
-  }, [resultData, imageUri]);
+    setIsProcessing(false);
+  }, [sessionId]);
 
   const handleScanAgain = () => {
     router.replace('/(tabs)');
@@ -55,8 +44,7 @@ export default function ResultScreen() {
     );
   }
 
-  // Parameter hilang atau parsing gagal
-  if (!data || !imageUri) {
+  if (!session || !session.response) {
     return (
       <SafeAreaView style={styles.centerContainer}>
         <AppIcon name="alert-circle-outline" size={64} color={Colors.accent} />
@@ -68,7 +56,8 @@ export default function ResultScreen() {
     );
   }
 
-  const { predicted_class, confidence_score, motif_details } = data;
+  const { predicted_class, confidence_score, motif_details } = session.response;
+  const imageUri = session.uri;
   const isUnrecognized = predicted_class === 'Negatif';
   const isLowConfidence = !isUnrecognized && confidence_score < 60;
 
@@ -83,7 +72,7 @@ export default function ResultScreen() {
           <Image
             source={{ uri: String(imageUri) }}
             style={styles.thumbnail}
-            resizeMode="cover"
+            resizeMode="contain"
           />
         </View>
 
