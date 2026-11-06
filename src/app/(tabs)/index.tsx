@@ -18,6 +18,7 @@ import { API_BASE_URL } from '@/config/api';
 import { prepareImage } from '@/services/image';
 import { predictImage, PredictResult } from '@/services/predict';
 import { setScanSession } from '@/state/scanSession';
+import { addHistory } from '@/storage/history';
 
 export default function ScannerScreen() {
   const [isLoading, setIsLoading] = useState(false);
@@ -83,6 +84,18 @@ export default function ScannerScreen() {
       // Simpan ke session memori dengan ID unik
       const sessionId = Date.now().toString();
       setScanSession(sessionId, compressedUri, predictResult.data);
+
+      // Simpan ke riwayat (gagal tidak menghalangi navigasi)
+      try {
+        await addHistory(
+          compressedUri,
+          predictResult.data.predicted_class,
+          predictResult.data.confidence_score,
+          predictResult.data.motif_details ?? null
+        );
+      } catch (err) {
+        console.warn('addHistory gagal:', err);
+      }
 
       // Navigasi ke result HANYA dengan session ID
       router.push({

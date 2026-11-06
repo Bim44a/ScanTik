@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '@/theme/colors';
 import { Typography } from '@/theme/typography';
 import AppIcon from '@/components/AppIcon';
@@ -17,6 +18,7 @@ import { getScanSession } from '@/state/scanSession';
 
 export default function ResultScreen() {
   const { sessionId } = useLocalSearchParams();
+  const insets = useSafeAreaInsets();
   const [session, setSession] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(true);
 
@@ -66,7 +68,7 @@ export default function ResultScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: Math.max(20, insets.bottom + 20) }]}>
         {/* Thumbnail foto */}
         <View style={styles.imageContainer}>
           <Image
