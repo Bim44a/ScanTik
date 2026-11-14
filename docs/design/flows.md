@@ -43,11 +43,17 @@ Keadaan:
 - Riwayat disimpan HANYA saat pindai baru, bukan saat membuka dari riwayat.
 
 ## 4. Katalog
-- Ketuk kartu: modal detail (nama, asal, filosofi, ciri). Ditutup lewat
-  tombol tutup, ketuk di luar, atau tombol kembali Android.
-- Pencarian lokal; kosong: "Motif tidak ditemukan".
-- Parameter motif=<kode> membuka modal langsung. Setelah ditutup, parameter
-  dibersihkan agar modal tidak terbuka lagi saat layar fokus ulang.
+- Filter asal (chip): Semua, Pekalongan, Cirebon. Satu chip aktif.
+- Filter dan pencarian BERLAKU BERSAMAAN (keduanya harus cocok).
+- Teks "N motif" mengikuti jumlah hasil setelah filter dan pencarian.
+- Ketuk kartu: lembar bawah detail (nama, asal, filosofi, ciri). Ditutup
+  lewat tombol "Tutup", ketuk area gelap di luar lembar, atau tombol kembali
+  Android.
+- Tidak ada hasil: "Motif tidak ditemukan".
+- Parameter motif=<kode> membuka lembar detail langsung. Setelah ditutup,
+  parameter dibersihkan agar tidak terbuka lagi saat layar fokus ulang.
+- Gambar motif: placeholder (kotak gelap, ikon dalam lingkaran emas 12%)
+  sampai foto contoh milik pemilik tersedia.
 
 ## 5. Riwayat
 - Ketuk entri: Hasil dengan data tersimpan (tanpa API, tanpa simpan ulang).
