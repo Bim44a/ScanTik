@@ -449,3 +449,32 @@ Satu milestone per sesi. Setiap milestone diakhiri laporan (Bagian 0.2) dan **be
 - Teks motif di Bagian 7 final untuk implementasi.
 - Bahan visual: docs/design/design-report.md (utama) dan docs/design/*.png.
   Jika bertentangan dengan tebakan agent, bahan ini yang berlaku.
+
+  ## 18. Catatan Perubahan v2.1 (berlaku mengikat)
+
+Status: M1 sampai M6.1 selesai dan diuji di HP Android. Tag v1.0.0.
+Repositori: github.com/Bim44a/ScanTik (cabang main).
+
+Penyimpangan dari isi di atas, yang berlaku:
+- Ikon: @expo/vector-icons (Ionicons). expo-symbols tidak dipakai.
+- Layar hasil menerima HANYA sessionId lewat rute. Uri foto dan data respons
+  disimpan di src/state/scanSession.ts (memori). Jangan mengirimnya lewat
+  parameter rute.
+- Unggah foto memakai kelas File dari expo-file-system. Bentuk lama
+  { uri, name, type } DITOLAK oleh fetch Expo SDK 58.
+- Font: Poppins (judul) dan Open Sans (isi dan kontrol) dari paket
+  @expo-google-fonts. Token tema ada di src/theme (colors.ts, typography.ts).
+- Sumber desain: docs/design/design-report.md. Teks di bawah judul Scanner
+  dihapus (hanya ada di dalam kartu unggah).
+- Format waktu riwayat: "Hari ini, 14:30" (titik dua).
+- Skor rendah: kartu peringatan memakai token tema yang ada, tanpa warna baru.
+- Alamat API: EXPO_PUBLIC_API_URL di .env, harus disesuaikan dengan IP
+  laptop pada jaringan yang dipakai. API saat ini berjalan di laptop pemilik
+  (hotspot HP). Rencana: deploy ke Railway setelah desain final.
+
+Aturan kerja tambahan untuk agent:
+- Paket hanya dipasang oleh pemilik. Agent dilarang menyentuh package.json.
+- Setiap laporan wajib menempelkan keluaran perintah (git status --short,
+  git diff --stat, findstr). Laporan tanpa bukti ditolak.
+- Setiap perubahan tampilan mengikuti design-report.md. Jangan mengarang
+  warna, ukuran, atau teks.
