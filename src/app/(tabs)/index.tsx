@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -8,9 +8,10 @@ import {
   Pressable,
   Alert,
   ActivityIndicator,
+  FlatList,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import AppIcon from '@/components/AppIcon';
 import { Colors } from '@/theme/colors';
 import { Typography } from '@/theme/typography';
@@ -18,12 +19,39 @@ import { API_BASE_URL } from '@/config/api';
 import { prepareImage } from '@/services/image';
 import { predictImage, PredictResult } from '@/services/predict';
 import { setScanSession } from '@/state/scanSession';
-import { addHistory } from '@/storage/history';
+import { addHistory, getHistory } from '@/storage/history';
+import { HistoryItem } from '@/types/history';
+import { MOTIFS } from '@/data/motifs';
+import { MOTIF_META } from '@/data/motifMeta';
+import SurfaceCard from '@/components/SurfaceCard';
+import IconCircle from '@/components/IconCircle';
+import SectionHeader from '@/components/SectionHeader';
+import HowItWorks from '@/components/HowItWorks';
+import MotifMiniCard from '@/components/MotifMiniCard';
+import PhotoTips from '@/components/PhotoTips';
+import RecentScanRow from '@/components/RecentScanRow';
+import { openHistoryItem } from '@/utils/openHistoryItem';
 
 export default function ScannerScreen() {
   const [isLoading, setIsLoading] = useState(false);
+  const [recent, setRecent] = useState<HistoryItem[]>([]);
 
-  const handlePickImage = async () => {
+  // Muat 3 entri terbaru setiap tab Scanner difokuskan
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      getHistory().then((items) => {
+        if (active) {
+          setRecent(items.slice(0, 3));
+        }
+      });
+      return () => {
+        active = false;
+      };
+    }, [])
+  );
+
+  const startScan = async () => {
     // Cek alamat server
     if (!API_BASE_URL) {
       Alert.alert(
@@ -35,7 +63,7 @@ export default function ScannerScreen() {
 
     // Minta izin akses galeri
     const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    
+
     if (!granted) {
       Alert.alert(
         'Izin dibutuhkan',
@@ -56,7 +84,7 @@ export default function ScannerScreen() {
     }
 
     const asset = result.assets[0];
-    
+
     // Cek ukuran file jika tersedia (10 MB = 10 * 1024 * 1024 bytes)
     if (asset.fileSize && asset.fileSize > 10 * 1024 * 1024) {
       Alert.alert(
@@ -72,10 +100,10 @@ export default function ScannerScreen() {
     try {
       // Kompres gambar
       const compressedUri = await prepareImage(asset.uri);
-      
+
       // Kirim ke API
       const predictResult = await predictImage(compressedUri);
-      
+
       if (!predictResult.ok) {
         Alert.alert('Gagal mengenali motif', predictResult.message);
         return;
@@ -115,51 +143,128 @@ export default function ScannerScreen() {
     }
   };
 
+  const openMotif = (className: string) => {
+    const meta = MOTIF_META[className];
+    if (!meta) return;
+    router.push({
+      pathname: '/(tabs)/catalog',
+      params: { motif: meta.slug },
+    });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* Header */}
         <View style={styles.header}>
           <Text style={styles.welcome}>Selamat datang,</Text>
           <Text style={styles.title}>ScanTik</Text>
-        </View>
-
-        {/* Kartu unggah */}
-        <View style={styles.uploadCard}>
-          <View style={styles.uploadIconContainer}>
-            <AppIcon name="image-outline" size={48} color={Colors.accent} />
-          </View>
-          <Text style={styles.uploadText}>
-            Unggah foto kain batik untuk mengenali motifnya.
-          </Text>
-          <Text style={styles.uploadHint}>
-            JPG / PNG · Maks. 10 MB
+          <Text style={styles.tagline}>
+            Kenali motif batik pesisir dalam sekali foto.
           </Text>
         </View>
 
-        {/* Tombol utama */}
-        <Pressable
-          style={[
-            styles.primaryButton,
-            isLoading && styles.primaryButtonDisabled,
-          ]}
-          onPress={handlePickImage}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <ActivityIndicator color={Colors.onPrimaryButton} size="small" />
-          ) : (
-            <AppIcon name="images-outline" size={20} color={Colors.onPrimaryButton} />
-          )}
-          <Text style={styles.primaryButtonText}>
-            {isLoading ? 'Menghubungkan ke Server...' : 'Pilih dari Galeri'}
-          </Text>
-        </Pressable>
+        {/* Kartu aksi */}
+        <SurfaceCard style={styles.actionCard}>
+          <Pressable
+            style={[styles.uploadZone, isLoading && styles.dimmed]}
+            onPress={startScan}
+            disabled={isLoading}
+          >
+            <IconCircle name="image-outline" size={56} iconSize={26} />
+            <Text style={styles.uploadText}>
+              Unggah foto kain batik untuk mengenali motifnya.
+            </Text>
+            <Text style={styles.uploadHint}>JPG / PNG · Maks. 10 MB</Text>
+          </Pressable>
 
-        {/* Catatan kaki */}
-        <View style={styles.footer}>
+          <Pressable
+            style={[styles.primaryButton, isLoading && styles.primaryButtonDisabled]}
+            onPress={startScan}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator color={Colors.onPrimaryButton} size="small" />
+            ) : (
+              <AppIcon name="images-outline" size={20} color={Colors.onPrimaryButton} />
+            )}
+            <Text style={styles.primaryButtonText}>
+              {isLoading ? 'Menghubungkan ke Server...' : 'Pilih dari Galeri'}
+            </Text>
+          </Pressable>
+
           <Text style={styles.footerText}>
             Foto Anda hanya digunakan untuk identifikasi.
           </Text>
+        </SurfaceCard>
+
+        {/* Cara kerja */}
+        <View style={styles.section}>
+          <HowItWorks />
+        </View>
+
+        {/* Motif yang dikenali */}
+        <View style={styles.section}>
+          <SectionHeader
+            title="Motif yang dikenali"
+            subtitle="6 motif"
+            rightLabel="Lihat semua"
+            onRightPress={() => router.push('/(tabs)/catalog')}
+          />
+          <FlatList
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            data={MOTIFS}
+            keyExtractor={(item) => item.class}
+            contentContainerStyle={styles.motifList}
+            renderItem={({ item }) => (
+              <MotifMiniCard
+                motif={item}
+                disabled={isLoading}
+                onPress={() => openMotif(item.class)}
+              />
+            )}
+          />
+        </View>
+
+        {/* Tips foto */}
+        <View style={styles.section}>
+          <PhotoTips onOpenHelp={() => router.push('/(tabs)/help')} />
+        </View>
+
+        {/* Pindaian terbaru */}
+        <View style={styles.section}>
+          <SectionHeader
+            title="Pindaian terbaru"
+            rightLabel="Lihat semua"
+            onRightPress={() => router.push('/(tabs)/history')}
+          />
+
+          {recent.length === 0 ? (
+            <SurfaceCard style={styles.emptyCard}>
+              <Text style={styles.emptyTitle}>Belum ada pindaian</Text>
+              <Text style={styles.emptyText}>
+                Pilih foto kain batik untuk memulai.
+              </Text>
+              <Pressable
+                style={[styles.secondaryButton, isLoading && styles.dimmed]}
+                onPress={startScan}
+                disabled={isLoading}
+              >
+                <Text style={styles.secondaryButtonText}>Pilih Foto</Text>
+              </Pressable>
+            </SurfaceCard>
+          ) : (
+            <View style={styles.recentList}>
+              {recent.map((item) => (
+                <RecentScanRow
+                  key={item.id}
+                  item={item}
+                  onPress={() => openHistoryItem(item)}
+                />
+              ))}
+            </View>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -172,12 +277,12 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   scrollContent: {
-    paddingHorizontal: 24, // TODO: Diukur dari scanner.png
-    paddingTop: 32,        // TODO: Diukur dari scanner.png
-    paddingBottom: 48,
+    paddingHorizontal: 16,
+    paddingTop: 24,
+    paddingBottom: 120,
   },
   header: {
-    marginBottom: 32,      // TODO: Diukur dari scanner.png
+    marginBottom: 24,
   },
   welcome: {
     ...Typography.greeting,
@@ -186,36 +291,41 @@ const styles = StyleSheet.create({
   title: {
     ...Typography.wordmark,
     color: Colors.accent,
-    marginTop: 4,
+    marginTop: 2,
   },
-  uploadCard: {
-    borderWidth: 1,        // Sesuai design-report.md: tebal 1 px
-    borderColor: Colors.primaryButton, // Sesuai design-report.md: #6B4423
+  tagline: {
+    ...Typography.greeting,
+    color: Colors.textSecondary,
+    marginTop: 6,
+  },
+  actionCard: {
+    padding: 12,
+  },
+  uploadZone: {
+    borderWidth: 1,
+    borderColor: Colors.primaryButton,
     borderStyle: 'dashed',
-    borderRadius: 16,      // TODO: Diukur dari scanner.png
-    padding: 32,           // TODO: Diukur dari scanner.png
+    borderRadius: 16,
+    padding: 24,
     alignItems: 'center',
-    marginBottom: 24,      // TODO: Diukur dari scanner.png
-    backgroundColor: Colors.surface, // #1D1814
-  },
-  uploadIconContainer: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
   uploadText: {
     ...Typography.uploadInstruction,
-    color: Colors.textPrimary, // #F4EBD9
+    color: Colors.textPrimary,
     textAlign: 'center',
-    marginBottom: 8,
+    marginTop: 12,
+    marginBottom: 4,
   },
   uploadHint: {
     ...Typography.metadata,
-    color: Colors.textSecondary, // #A39893
+    color: Colors.textSecondary,
   },
   primaryButton: {
     flexDirection: 'row',
-    backgroundColor: Colors.primaryButton, // #6B4423
-    borderRadius: 12,      // TODO: Diukur dari scanner.png
-    paddingVertical: 16,
+    backgroundColor: Colors.primaryButton,
+    borderRadius: 12,
+    height: 52,
     paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
@@ -227,17 +337,51 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     ...Typography.buttonLabel,
-    color: Colors.onPrimaryButton, // #FFFFFF
-  },
-  footer: {
-    marginTop: 24,
-    paddingHorizontal: 16,
+    color: Colors.onPrimaryButton,
   },
   footerText: {
     ...Typography.metadata,
     color: Colors.textSecondary,
     textAlign: 'center',
+    marginTop: 12,
+  },
+  dimmed: {
+    opacity: 0.5,
+  },
+  section: {
+    marginTop: 24,
+  },
+  motifList: {
+    marginTop: 12,
+    gap: 12,
+  },
+  emptyCard: {
+    marginTop: 12,
+    gap: 8,
+  },
+  emptyTitle: {
+    ...Typography.cardName,
+    color: Colors.textPrimary,
+  },
+  emptyText: {
+    ...Typography.cardBody,
+    color: Colors.textSecondary,
+  },
+  secondaryButton: {
+    marginTop: 8,
+    height: 44,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  secondaryButtonText: {
+    ...Typography.buttonLabel,
+    color: Colors.accent,
+  },
+  recentList: {
+    marginTop: 12,
+    gap: 12,
   },
 });
-
-
