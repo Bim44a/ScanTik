@@ -1,100 +1,86 @@
-## 1. Color Palette (HEX)
+# Spesifikasi Desain ScanTik v2.0
 
-| Elemen | Warna | Keterangan |
-|---|---|---|
-| Latar halaman | `#161311` | Hitam kecokelatan; konsisten pada keempat halaman |
-| Isi kartu unggah | `#1D1814` | Sedikit lebih terang dari latar halaman |
-| Garis putus-putus kartu unggah | `#6B4423` | Cokelat; tebal 1 px, pola 6 px garis / 5 px jeda |
-| Isi tombol "Pilih dari Galeri" | `#6B4423` | Sama dengan warna garis kartu unggah |
-| Teks "Pilih dari Galeri" | `#FFFFFF` | Putih |
-| Tulisan "ScanTik" | `#D4AF37` | Emas; juga untuk status aktif dan lencana |
-| Teks "Selamat datang," | `#A39893` | Abu-abu hangat |
-| Teks sekunder ("JPG / PNG", "Maks. 10 MB") | `#A39893` | Sama dengan deskripsi kartu dan label tab nonaktif |
-| Isi kartu motif di Katalog | `#241F1C` | Cokelat gelap sebagai permukaan kartu |
-| Isi lencana "Kecocokan 94%" | `#D4AF37` | Emas |
-| Teks lencana "Kecocokan 94%" | `#161311` | Sama dengan latar halaman |
-| Ikon tab aktif | `#D4AF37` | Emas |
-| Ikon tab nonaktif | `#A39893` | Abu-abu hangat |
-| Teks utama / judul | `#F4EBD9` | Cream |
-| Garis pemisah navigasi bawah | `#3A312B` | Cokelat gelap |
+## 0. Aturan
+- Sumber kebenaran visual: gambar docs/design/v2/*.png DAN dokumen ini.
+  Jika bertentangan, bagian 7 (pengecualian) menang, lalu gambar, lalu angka (~).
+- Data pada gambar (angka, foto, nama) hanya contoh. Data nyata dari aplikasi.
+- Tanpa foto motif: pakai placeholder (kotak gelap + ikon dalam lingkaran).
+- Tanpa warna, font, atau ikon di luar dokumen ini. Tanpa paket baru.
+  Animasi dan lembar bawah memakai komponen React Native bawaan (Modal, Animated).
+- Teks UI persis seperti gambar kecuali dinyatakan lain.
 
-Semua warna utama menggunakan opacity 100%.
+## 1. Warna (token)
+background #161311 | surface #1D1814 | surfaceElevated #241F1C
+border #3A312B | accent #D4AF37 | accentSoft rgba(212,175,55,0.12)
+textPrimary #F4EBD9 | textSecondary #A39893
+buttonPrimary #6B4423 | onButton #FFFFFF | onBadge #161311
+Garis putus-putus zona unggah: #6B4423, 1 px, pola 6 garis 5 jeda.
+Kedalaman: lapisan warna dan garis tepi 1 px border. TANPA bayangan.
 
-### Karakter palet
+## 2. Tipografi
+Poppins: Bold 36/45 (wordmark, tracking -1.3) | Bold 28/40 (judul layar,
+tracking -0.6) | Bold 24 (nama motif di detail) | SemiBold 17/24 (judul seksi)
+| SemiBold 15/23 (judul kartu) | SemiBold 13 (nama di kartu kecil).
+Open Sans: Regular 14/21 (isi detail) | Regular 13 (sapaan, subjudul) |
+Regular 12/18 (isi kartu, waktu, tautan kecil) | Regular 11 (label tab,
+metadata) | SemiBold 15 (label tombol) | SemiBold 13 (tautan emas) |
+SemiBold 11 (lencana) | Bold 11 (label tab aktif).
 
-Latar hitam hangat, permukaan cokelat gelap, teks cream, dan aksen emas. Tombol utama memakai cokelat, sedangkan emas menonjolkan identitas merek, status aktif, dan hasil kecocokan. Gunakan nilai hex `#D4AF37` untuk aksen emas, bukan hanya istilah "Champagne Gold".
+## 3. Jarak dan bentuk (~)
+Margin horizontal layar 16. Jarak antar seksi 24. Jarak antar kartu 12.
+Radius: kartu 16, kartu besar dan lembar bawah 24, tombol 12, kolom cari 16,
+chip dan lencana pill. Tinggi: tombol 52, kolom cari 48, chip filter 36,
+lencana 20, tab bar 64 + safe area bawah.
 
-## 2. Typography
+## 4. Komponen
+- Tombol utama: buttonPrimary, teks onButton, tinggi 52, radius 12.
+- Tombol sekunder: transparan, garis 1 px accent, teks accent.
+- Lencana "Kecocokan 94%": tinggi 20, padding horizontal 8, pill,
+  latar accent, teks onBadge Open Sans SemiBold 11. Format angka: koma
+  desimal, satu desimal pada layar Hasil (94,9%), bulat tidak perlu di daftar
+  bila datanya bulat; gunakan satu desimal agar konsisten (94,9%).
+- Chip asal: tinggi 24, surfaceElevated, garis border, ikon pin accent,
+  teks textSecondary 12.
+- Chip netral "Tidak dikenali": tinggi 20, surfaceElevated, garis border.
+- Chip filter: tinggi 36, pill. Aktif: latar accentSoft, garis dan teks accent.
+  Nonaktif: garis border, teks textSecondary. Ketiganya harus muat tanpa
+  terpotong.
+- Kartu: surface, garis 1 px border, padding 12 sampai 20.
+- Ikon dalam lingkaran: lingkaran accentSoft, ikon accent.
+- Tab bar: 4 tab, latar background, garis atas border. Aktif: ikon dan label
+  accent, label Bold. Nonaktif: textSecondary, Regular.
 
-Ukuran dalam px. *Line height* adalah tinggi baris; *letter spacing* adalah jarak antarhuruf.
+## 5. Peta ikon (Ionicons; tsc memvalidasi nama)
+Tab: Scanner scan-outline/scan | Katalog grid-outline/grid |
+Riwayat time-outline/time | Help help-circle-outline/help-circle.
+Zona unggah: image-outline. Cari: search-outline. Panah kartu: chevron-forward.
+Pin asal: location-outline. Centang: checkmark. Silang: close.
+Info: information-circle-outline. Kosong riwayat: time-outline.
+Motif: Jlamprang flower-outline | Buketan leaf-outline | Liong flame-outline |
+Mega Mendung cloud-outline | Singa Barong paw-outline |
+Tujuh Rupa color-palette-outline.
+Jika sebuah nama ditolak tipe, pilih Ionicons sepadan dan LAPORKAN.
 
-| Peran / contoh | Font | Weight | Ukuran | Line height | Letter spacing | Warna |
-|---|---|---|---:|---:|---:|---|
-| Wordmark "ScanTik" | Poppins | Bold 700 | 36 | 125% (45 px) | -1,3 px | `#D4AF37` |
-| Judul layar "Katalog Motif" | Poppins | Bold 700 | 28 | 40 px | -0,6 px | `#F4EBD9` |
-| Judul kartu "Motif Jlamprang" | Poppins | SemiBold 600 | 15 | 23 px | 0 | `#F4EBD9` |
-| Isi kartu "Geometri pesisir dengan..." | Open Sans | Regular 400 | 12 | 18 px | 0 | `#A39893` |
-| Sapaan "Selamat datang," | Open Sans | Regular 400 | 13 | Auto | 0 | `#A39893` |
-| Label tombol "Pilih dari Galeri" | Open Sans | SemiBold 600 | 15 | Auto | 0 | `#FFFFFF` |
-| Label tab "Scanner" (aktif) | Open Sans | Bold 700 | 11 | Auto | 0 | `#D4AF37` |
-| Label tab "Scanner" (nonaktif) | Open Sans | Regular 400 | 11 | Auto | 0 | `#A39893` |
-| Lencana "Kecocokan 94%" | Open Sans | SemiBold 600 | 11 | 16 px | 0 | `#161311` |
+## 6. Layar (ringkas; detail pada gambar dan flows.md)
+- Scanner: header (sapaan, wordmark, tagline), kartu aksi (zona unggah +
+  tombol + catatan), "Cara kerja" 3 langkah, "Motif yang dikenali" (baris
+  geser, tautan Lihat semua), "Tips foto" (tautan ke Help), "Pindaian terbaru"
+  (maks 3, tautan Lihat semua; kosong: kartu ajakan).
+- Katalog: judul, subjudul, kolom cari, chip filter, "N motif", grid 2 kolom,
+  lembar bawah detail (hero placeholder, nama, chip asal, Filosofi, Ciri,
+  tombol Tutup).
+- Riwayat: judul, subjudul, "Pindaian terbaru" + jumlah, tautan Hapus
+  Riwayat, kelompok waktu (Hari ini, Kemarin, Lebih lama), kartu entri
+  (thumbnail 64, nama, baris kedua lencana + waktu, panah). Kosong: ikon,
+  judul, teks, tombol "Mulai Pindai".
+- Help: label "PUSAT BANTUAN", judul, subjudul, dua kartu Do's/Don'ts,
+  "Tiga Aturan Wajib", "Informasi" (Status layanan dengan titik, Versi).
+  Titik status: accent untuk "Layanan siap", textSecondary untuk gagal.
+- Hasil: TIDAK diubah, selain tombol sekunder "Lihat di Katalog".
 
-### Detail tambahan
-
-- Judul "Motif Jlamprang" konsisten di Katalog dan Riwayat: Poppins SemiBold, 15/23 px.
-- Deskripsi kartu Katalog memakai 12/18 px (line height 150%).
-- Metadata "JPG / PNG" dan "Maks. 10 MB": Open Sans Regular 11 px, line height Auto.
-- Instruksi unggah: Open Sans Regular 15 px, line height 165% (sekitar 24,75 px), rata tengah.
-- Semua teks memakai kapitalisasi sesuai aslinya, tanpa italic, underline, atau strikethrough.
-- Label tombol dan tab berada di tengah komponen melalui tata letak, walau properti perataan teksnya kiri.
-- "Auto" berarti tinggi baris mengikuti metrik font. Sebagai pembanding, tinggi kotak teks sapaan 18 px, label tombol 20 px, dan label tab 15 px.
-
-## 3. Temuan Konsistensi Antarhalaman
-
-### Yang sudah konsisten
-
-- Latar halaman `#161311`.
-- Permukaan kartu utama `#241F1C`.
-- Teks utama cream, teks sekunder abu-abu hangat, aksen emas.
-- Pembagian font: Poppins untuk identitas/judul, Open Sans untuk informasi dan kontrol.
-- Pada tiga halaman utama, tab aktif memakai emas + Bold 700, tab nonaktif memakai abu-abu + Regular 400.
-
-### Yang masih berbeda
-
-**1. Bahasa label tab belum seragam**
-
-| Halaman (node) | Label navigasi saat ini |
-|---|---|
-| Scanner (1:135) | Scanner, Catalog, History, Help |
-| Katalog (1:67) | Scanner, Katalog, History, Help |
-| Riwayat (1:2) | Scanner, Katalog, Riwayat, Help |
-| Panduan Foto (3:78) | Scanner, Katalog, Riwayat, Help |
-
-**2. Ketebalan tab di halaman Panduan Foto tidak sesuai statusnya**
-
-- "Help" sudah berwarna emas, tetapi teksnya masih Regular 400.
-- "Riwayat" berwarna nonaktif, tetapi teksnya masih Bold 700.
-
-Warna status aktif sudah menunjuk Help, tetapi ketebalan teks belum mengikuti pola tiga halaman utama.
-
-## 4. Keterbacaan Warna
-
-| Pasangan | Rasio kontras | Penilaian |
-|---|---:|---|
-| Teks cream / latar halaman | 15,62:1 | Memenuhi WCAG AAA (teks normal) |
-| Teks sekunder / latar halaman | 6,58:1 | Memenuhi WCAG AA |
-| Teks sekunder / kartu Katalog | 5,80:1 | Memenuhi WCAG AA |
-| Teks sekunder / kartu unggah | 6,26:1 | Memenuhi WCAG AA |
-| Teks putih / tombol cokelat | 8,48:1 | Memenuhi WCAG AAA |
-| Teks gelap / lencana emas | 8,80:1 | Memenuhi WCAG AAA |
-| Emas / latar halaman | 8,80:1 | Kontras kuat untuk tab aktif |
-| Garis putus-putus / isi kartu unggah | 2,08:1 | Di bawah 3:1 jika garis menjadi penanda batas kontrol yang wajib terlihat |
-
-**Kesimpulan:** kontras teks secara umum sudah baik. Area yang perlu perhatian:
-
-- Garis batas unggah yang cukup samar.
-- Ukuran teks kecil 11-12 px.
-- Konsistensi bahasa dan ketebalan status tab.
-
-Rasio warna saja belum memastikan aksesibilitas keseluruhan; keterbacaan tetap perlu dinilai pada ukuran ponsel sebenarnya.
+## 7. Pengecualian terhadap gambar (dokumen ini menang)
+1. Lencana di daftar: ukuran ramping bagian 4 (gambar masih besar).
+2. Ikon tab Katalog: grid (gambar Scanner masih memakai buku).
+3. Bayangan di bawah chip "DO'S" pada gambar: abaikan.
+4. Waktu entri riwayat: format "14:30" di samping lencana, bukan di tepi kanan.
+5. Asal motif dari data, bukan gambar (Mega Mendung dan Singa Barong: Cirebon).
