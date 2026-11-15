@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   FlatList,
   TextInput,
+  useWindowDimensions,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { MOTIFS, Motif } from '@/data/motifs';
@@ -21,6 +22,8 @@ type RegionFilter = 'Semua' | 'Pekalongan' | 'Cirebon';
 
 export default function CatalogScreen() {
   const { motif: motifSlug } = useLocalSearchParams<{ motif?: string }>();
+  const { width } = useWindowDimensions();
+  const cardWidth = (width - 16 * 2 - 12) / 2;
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<RegionFilter>('Semua');
   const [selectedMotif, setSelectedMotif] = useState<Motif | null>(null);
@@ -93,12 +96,18 @@ export default function CatalogScreen() {
 
       {/* Grid */}
       <FlatList
+        style={styles.listContainer}
         data={filteredMotifs}
         renderItem={({ item }) => (
-          <MotifCard motif={item} onPress={() => setSelectedMotif(item)} />
+          <MotifCard
+            motif={item}
+            width={cardWidth}
+            onPress={() => setSelectedMotif(item)}
+          />
         )}
         keyExtractor={(item) => item.class}
         numColumns={2}
+        columnWrapperStyle={styles.columnWrapper}
         contentContainerStyle={styles.list}
         ListEmptyComponent={
           <Text style={styles.emptyText}>Motif tidak ditemukan</Text>
@@ -157,9 +166,16 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 8,
   },
+  listContainer: {
+    flex: 1,
+  },
+  columnWrapper: {
+    alignItems: 'flex-start',
+    gap: 12,
+  },
   list: {
-    paddingHorizontal: 10, // Margin kartu 6x2 = 12, padding 10 -> total 16
-    paddingBottom: 20,
+    paddingHorizontal: 16,
+    paddingBottom: 120,
   },
   emptyText: {
     ...Typography.cardBody,

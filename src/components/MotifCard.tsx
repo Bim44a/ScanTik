@@ -10,19 +10,21 @@ import IconCircle from './IconCircle';
 
 export interface MotifCardProps {
   motif: Motif;
+  width: number;
   onPress: () => void;
 }
 
 /**
  * Kartu motif untuk grid Katalog.
  * Gambar placeholder 4:3, nama, OriginChip (kota), filosofi maks 2 baris.
+ * Lebar kartu ditetapkan oleh pemanggil agar satu hasil tetap satu kolom.
  */
-export default function MotifCard({ motif, onPress }: MotifCardProps) {
+export default function MotifCard({ motif, width, onPress }: MotifCardProps) {
   const meta = MOTIF_META[motif.class];
   const region = getRegion(motif.origin);
 
   return (
-    <Pressable onPress={onPress} style={styles.container}>
+    <Pressable onPress={onPress} style={[styles.container, { width }]}>
       <SurfaceCard style={styles.card}>
         {/* Placeholder Gambar 4:3 */}
         <View style={styles.imagePlaceholder}>
@@ -45,12 +47,10 @@ export default function MotifCard({ motif, onPress }: MotifCardProps) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 6, // Jarak antar kartu (total 12)
+    // Lebar tetap diatur lewat prop width; tinggi mengikuti isi.
   },
   card: {
     padding: 8,
-    height: '100%',
   },
   imagePlaceholder: {
     width: '100%',
