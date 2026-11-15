@@ -1,5 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  Image,
+  ImageSourcePropType,
+} from 'react-native';
 import { Colors } from '@/theme/colors';
 import { Typography } from '@/theme/typography';
 import AppIcon, { AppIconName } from './AppIcon';
@@ -13,11 +20,13 @@ export interface PhotoExampleCardProps {
   variant: 'accent' | 'neutral';
   caption: string;
   width: number;
+  photo?: ImageSourcePropType;
+  onOpenPhoto?: () => void;
 }
 
 /**
  * Kartu contoh foto (DO'S / DON'TS) untuk layar Help.
- * Placeholder gambar 4:3, tanpa foto dan tanpa bayangan.
+ * Foto asli 4:3 dapat ditekan untuk pratinjau; tanpa foto memakai placeholder.
  */
 export default function PhotoExampleCard({
   title,
@@ -26,8 +35,13 @@ export default function PhotoExampleCard({
   variant,
   caption,
   width,
+  photo,
+  onOpenPhoto,
 }: PhotoExampleCardProps) {
   const isAccent = variant === 'accent';
+  const photoAccessibilityLabel = isAccent
+    ? 'Perbesar contoh foto yang benar'
+    : 'Perbesar contoh foto yang dihindari';
 
   return (
     <SurfaceCard style={[styles.card, { width }]}>
@@ -54,9 +68,19 @@ export default function PhotoExampleCard({
         </Text>
       </View>
 
-      <View style={styles.placeholder}>
-        <IconCircle name="image-outline" size={48} iconSize={22} />
-      </View>
+      {photo ? (
+        <Pressable
+          onPress={onOpenPhoto}
+          accessibilityRole="imagebutton"
+          accessibilityLabel={photoAccessibilityLabel}
+        >
+          <Image source={photo} style={styles.photo} resizeMode="cover" />
+        </Pressable>
+      ) : (
+        <View style={styles.placeholder}>
+          <IconCircle name="image-outline" size={48} iconSize={22} />
+        </View>
+      )}
 
       <Text style={styles.caption}>{caption}</Text>
     </SurfaceCard>
@@ -91,7 +115,13 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 4,
+  },
+  photo: {
+    width: '100%',
+    aspectRatio: 4 / 3,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   caption: {
     ...Typography.cardBody,

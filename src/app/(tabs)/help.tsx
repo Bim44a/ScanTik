@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   ScrollView,
   SafeAreaView,
   useWindowDimensions,
+  ImageSourcePropType,
 } from 'react-native';
 import Constants from 'expo-constants';
 import { Colors } from '@/theme/colors';
@@ -14,6 +15,8 @@ import SurfaceCard from '@/components/SurfaceCard';
 import SectionHeader from '@/components/SectionHeader';
 import PhotoExampleCard from '@/components/PhotoExampleCard';
 import StatusRow from '@/components/StatusRow';
+import ImageLightbox from '@/components/ImageLightbox';
+import { doPhoto, dontPhoto } from '@/data/helpPhotos';
 
 const RULES: string[] = [
   'Cahaya terang dan merata',
@@ -25,6 +28,10 @@ export default function HelpScreen() {
   const { width } = useWindowDimensions();
   const cardWidth = (width - 16 * 2 - 12) / 2;
   const appVersion = Constants.expoConfig?.version || '1.0.0';
+  const [lightbox, setLightbox] = useState<{
+    source: ImageSourcePropType;
+    caption: string;
+  } | null>(null);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -46,6 +53,13 @@ export default function HelpScreen() {
             variant="accent"
             caption="Kain rata, cahaya terang, dan motif terlihat jelas."
             width={cardWidth}
+            photo={doPhoto}
+            onOpenPhoto={() =>
+              setLightbox({
+                source: doPhoto,
+                caption: 'Kain rata, cahaya terang, dan motif terlihat jelas.',
+              })
+            }
           />
           <PhotoExampleCard
             title="Hindari"
@@ -54,6 +68,13 @@ export default function HelpScreen() {
             variant="neutral"
             caption="Kain terlipat, gelap, atau buram akan menurunkan akurasi AI."
             width={cardWidth}
+            photo={dontPhoto}
+            onOpenPhoto={() =>
+              setLightbox({
+                source: dontPhoto,
+                caption: 'Kain terlipat, gelap, atau buram akan menurunkan akurasi AI.',
+              })
+            }
           />
         </View>
 
@@ -88,6 +109,15 @@ export default function HelpScreen() {
           </SurfaceCard>
         </View>
       </ScrollView>
+
+      {lightbox ? (
+        <ImageLightbox
+          visible
+          source={lightbox.source}
+          caption={lightbox.caption}
+          onClose={() => setLightbox(null)}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -122,7 +152,7 @@ const styles = StyleSheet.create({
   },
   exampleRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'stretch',
     gap: 12,
   },
   section: {
