@@ -74,10 +74,16 @@ export default function PhotoExampleCard({
           accessibilityRole="imagebutton"
           accessibilityLabel={photoAccessibilityLabel}
         >
-          <Image source={photo} style={styles.photo} resizeMode="cover" />
+          <View style={styles.photoFrame}>
+            <Image
+              source={photo}
+              style={StyleSheet.absoluteFill}
+              resizeMode="cover"
+            />
+          </View>
         </Pressable>
       ) : (
-        <View style={styles.placeholder}>
+        <View style={[styles.photoFrame, styles.placeholder]}>
           <IconCircle name="image-outline" size={48} iconSize={22} />
         </View>
       )}
@@ -90,6 +96,7 @@ export default function PhotoExampleCard({
 const styles = StyleSheet.create({
   card: {
     gap: 8,
+    overflow: 'hidden',
   },
   title: {
     ...Typography.cardTitle,
@@ -109,17 +116,15 @@ const styles = StyleSheet.create({
     ...Typography.badgeSmall,
   },
   placeholder: {
-    width: '100%',
-    aspectRatio: 4 / 3,
     backgroundColor: Colors.surfaceElevated,
-    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  photo: {
+  photoFrame: {
     width: '100%',
     aspectRatio: 4 / 3,
     borderRadius: 12,
+    overflow: 'hidden',
     borderWidth: 1,
     borderColor: Colors.border,
   },
