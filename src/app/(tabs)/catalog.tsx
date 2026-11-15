@@ -1,110 +1,111 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  TextInput,
-  FlatList,
-  Pressable,
-  Modal,
-  ScrollView,
   SafeAreaView,
+  FlatList,
+  TextInput,
 } from 'react-native';
-import AppIcon from '@/components/AppIcon';
+import { useLocalSearchParams, router } from 'expo-router';
+import { MOTIFS, Motif } from '@/data/motifs';
+import { MOTIF_META } from '@/data/motifMeta';
 import { Colors } from '@/theme/colors';
 import { Typography } from '@/theme/typography';
-import { MOTIFS, Motif } from '@/data/motifs';
+import AppIcon from '@/components/AppIcon';
+import FilterChip from '@/components/FilterChip';
+import MotifCard from '@/components/MotifCard';
+import MotifSheet from '@/components/MotifSheet';
+
+type RegionFilter = 'Semua' | 'Pekalongan' | 'Cirebon';
 
 export default function CatalogScreen() {
-  const [searchQuery, setSearchQuery] = useState('');
+  const { motif: motifSlug } = useLocalSearchParams<{ motif?: string }>();
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState<RegionFilter>('Semua');
   const [selectedMotif, setSelectedMotif] = useState<Motif | null>(null);
 
-  const filteredMotifs = useMemo(() => {
-    return MOTIFS.filter((motif) =>
-      motif.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [searchQuery]);
+  // Auto-open detail jika ada param rute
+  useEffect(() => {
+    if (motifSlug) {
+      const motif = MOTIFS.find(
+        (m) => MOTIF_META[m.class]?.slug === motifSlug
+      );
+      if (motif) {
+        setSelectedMotif(motif);
+      }
+    }
+  }, [motifSlug]);
 
-  const renderItem = ({ item }: { item: Motif }) => (
-    <Pressable
-      style={styles.card}
-      onPress={() => setSelectedMotif(item)}
-    >
-      <View style={styles.placeholderImage}>
-        <AppIcon name="image-outline" size={32} color={Colors.accent} />
-      </View>
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{item.name}</Text>
-        <Text style={styles.cardSubtitle} numberOfLines={2}>
-          {item.philosophy}
-        </Text>
-      </View>
-    </Pressable>
-  );
+  const filteredMotifs = useMemo(() => {
+    return MOTIFS.filter((m) => {
+      // Filter wilayah
+      const matchRegion =
+        filter === 'Semua' || m.origin.includes(filter);
+      // Filter pencarian
+      const matchSearch = m.name
+        .toLowerCase()
+        .includes(search.toLowerCase());
+      return matchRegion && matchSearch;
+    });
+  }, [filter, search]);
+
+  const handleCloseSheet = () => {
+    setSelectedMotif(null);
+    if (motifSlug) {
+      router.setParams({ motif: undefined });
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Katalog Motif</Text>
-        <View style={styles.searchContainer}>
-          <AppIcon name="search" size={20} color={Colors.textSecondary} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Cari motif batik..."
-            placeholderTextColor={Colors.textSecondary}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
+        <Text style={styles.subtitle}>Pelajari 6 motif batik pesisir utara Jawa.</Text>
+      </View>
+
+      {/* Search Bar */}
+      <View style={styles.searchBar}>
+        <AppIcon name="search-outline" size={20} color={Colors.textSecondary} />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Cari motif batik..."
+          placeholderTextColor={Colors.textSecondary}
+          value={search}
+          onChangeText={setSearch}
+        />
+      </View>
+
+      {/* Filter Bar */}
+      <View style={styles.filterBar}>
+        {(['Semua', 'Pekalongan', 'Cirebon'] as RegionFilter[]).map((r) => (
+          <FilterChip
+            key={r}
+            label={r}
+            active={filter === r}
+            onPress={() => setFilter(r)}
           />
-        </View>
+        ))}
       </View>
 
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Jelajahi motif</Text>
-        <Text style={styles.sectionCount}>{filteredMotifs.length}</Text>
-      </View>
+      {/* Count */}
+      <Text style={styles.countText}>{filteredMotifs.length} motif</Text>
 
+      {/* Grid */}
       <FlatList
         data={filteredMotifs}
-        renderItem={renderItem}
+        renderItem={({ item }) => (
+          <MotifCard motif={item} onPress={() => setSelectedMotif(item)} />
+        )}
         keyExtractor={(item) => item.class}
-        contentContainerStyle={styles.listContent}
+        numColumns={2}
+        contentContainerStyle={styles.list}
         ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>Motif tidak ditemukan</Text>
-          </View>
+          <Text style={styles.emptyText}>Motif tidak ditemukan</Text>
         }
       />
 
-      <Modal
-        visible={selectedMotif !== null}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setSelectedMotif(null)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <ScrollView contentContainerStyle={styles.modalScroll}>
-              <Text style={styles.modalTitle}>{selectedMotif?.name}</Text>
-              
-              <Text style={styles.label}>Asal</Text>
-              <Text style={styles.value}>{selectedMotif?.origin}</Text>
-              
-              <Text style={styles.label}>Filosofi</Text>
-              <Text style={styles.value}>{selectedMotif?.philosophy}</Text>
-              
-              <Text style={styles.label}>Ciri</Text>
-              <Text style={styles.value}>{selectedMotif?.characteristics}</Text>
-            </ScrollView>
-            
-            <Pressable
-              style={styles.closeButton}
-              onPress={() => setSelectedMotif(null)}
-            >
-              <Text style={styles.closeButtonText}>Tutup</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
+      <MotifSheet motif={selectedMotif} onClose={handleCloseSheet} />
     </SafeAreaView>
   );
 }
@@ -115,130 +116,55 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   header: {
-    padding: 20, // TODO: Diukur dari katalog.png
+    padding: 16,
   },
   title: {
     ...Typography.screenTitle,
     color: Colors.textPrimary,
-    marginBottom: 16,
   },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.surfaceElevated,
-    borderRadius: 12, // TODO: Diukur dari katalog.png
-    paddingHorizontal: 12,
-    height: 48,
-  },
-  searchInput: {
-    flex: 1,
-    color: Colors.textPrimary,
-    marginLeft: 8,
-    fontSize: 16, // TODO: Gunakan typography token untuk body text
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    ...Typography.cardTitle,
-    color: Colors.textPrimary,
-    marginRight: 8,
-  },
-  sectionCount: {
-    ...Typography.metadata,
+  subtitle: {
+    ...Typography.cardBody,
     color: Colors.textSecondary,
-    backgroundColor: Colors.surface,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 10,
-    overflow: 'hidden',
+    marginTop: 2,
   },
-  listContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  card: {
+  searchBar: {
     flexDirection: 'row',
-    backgroundColor: Colors.surfaceElevated, // #241F1C sesuai design-report.md
-    borderRadius: 16, // TODO: Diukur dari katalog.png
-    marginBottom: 12,
-    overflow: 'hidden',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    paddingHorizontal: 12,
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    height: 48,
+    gap: 8,
     borderWidth: 1,
     borderColor: Colors.border,
   },
-  placeholderImage: {
-    width: 100,
-    height: 100,
-    backgroundColor: Colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cardContent: {
+  searchInput: {
     flex: 1,
-    padding: 12,
-    justifyContent: 'center',
-  },
-  cardTitle: {
-    ...Typography.cardTitle,
+    ...Typography.cardBody,
     color: Colors.textPrimary,
-    marginBottom: 4,
   },
-  cardSubtitle: {
+  filterBar: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    marginTop: 20,
+    gap: 8,
+  },
+  countText: {
     ...Typography.cardBody,
     color: Colors.textSecondary,
+    paddingHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 8,
   },
-  emptyContainer: {
-    paddingTop: 100,
-    alignItems: 'center',
-  },
-  emptyText: {
-    color: Colors.textSecondary,
-    fontSize: 16, // TODO: Gunakan typography token
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: Colors.surfaceElevated,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    maxHeight: '80%',
-    padding: 24,
-  },
-  modalScroll: {
+  list: {
+    paddingHorizontal: 10, // Margin kartu 6x2 = 12, padding 10 -> total 16
     paddingBottom: 20,
   },
-  modalTitle: {
-    ...Typography.screenTitle,
-    color: Colors.textPrimary,
-    marginBottom: 20,
-  },
-  label: {
-    ...Typography.cardTitle,
-    color: Colors.accent,
-    marginTop: 16,
-    textTransform: 'uppercase',
-  },
-  value: {
+  emptyText: {
     ...Typography.cardBody,
-    color: Colors.textPrimary,
-    marginTop: 4,
-  },
-  closeButton: {
-    backgroundColor: Colors.primaryButton,
-    borderRadius: 12, // TODO: Diukur dari katalog.png
-    height: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
+    color: Colors.textSecondary,
+    textAlign: 'center',
     marginTop: 20,
-  },
-  closeButtonText: {
-    ...Typography.buttonLabel,
-    color: Colors.onPrimaryButton,
   },
 });
