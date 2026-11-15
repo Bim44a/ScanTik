@@ -62,8 +62,13 @@ Keadaan:
 - Daftar dimuat ulang setiap tab Riwayat fokus.
 
 ## 6. Help
-- Baris "Status layanan": dicek otomatis saat tab Help fokus (memanggil
-  checkHealth). Menunggu: "Memeriksa layanan...". Berhasil: titik hijau
-  "Layanan siap". Gagal: titik abu-abu "Layanan tidak dapat dihubungi" dan
-  tautan "Coba lagi". TIDAK ADA tombol "Cek koneksi server".
+- Baris "Status layanan": dicek otomatis saat tab Help fokus (checkHealth).
+  Menunggu: "Memeriksa layanan...". Berhasil: titik emas "Layanan siap".
+  Gagal: titik abu-abu "Layanan tidak dapat dihubungi" dan tautan "Coba
+  lagi". TIDAK ADA tombol "Cek koneksi server".
+- Dua kartu contoh (DO'S dan DON'TS) berdampingan dengan TINGGI SAMA.
+- Ketuk gambar contoh: pratinjau layar penuh (Modal, latar gelap, gambar
+  contain). Menutup lewat ketuk di mana saja, tombol tutup (ikon close),
+  atau tombol kembali Android. Hanya aktif bila foto tersedia; tanpa foto,
+  gambar tidak dapat diketuk.
 - Konten panduan tidak membuka layar lain.
