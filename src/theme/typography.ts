@@ -27,6 +27,54 @@ export const Typography = {
     lineHeight: 23,
     letterSpacing: 0,
   },
+
+  // Nama motif pada kartu riwayat
+  cardName: {
+    fontFamily: 'Poppins_600SemiBold',
+    fontSize: 15,
+    lineHeight: 23,
+    letterSpacing: 0,
+  },
+
+  // Nama pada kartu kecil
+  smallCardName: {
+    fontFamily: 'Poppins_600SemiBold',
+    fontSize: 13,
+    lineHeight: undefined, // Auto
+    letterSpacing: 0,
+  },
+
+  // Judul seksi "Pindaian terbaru"
+  sectionTitle: {
+    fontFamily: 'Poppins_600SemiBold',
+    fontSize: 17,
+    lineHeight: 24,
+    letterSpacing: 0,
+  },
+
+  // Nama motif pada layar detail
+  detailTitle: {
+    fontFamily: 'Poppins_700Bold',
+    fontSize: 24,
+    lineHeight: undefined, // Auto
+    letterSpacing: 0,
+  },
+
+  // Isi detail (filosofi, ciri)
+  detailBody: {
+    fontFamily: 'OpenSans_400Regular',
+    fontSize: 14,
+    lineHeight: 21,
+    letterSpacing: 0,
+  },
+
+  // Tautan emas kecil "Hapus Riwayat", "Lihat semua"
+  linkGold: {
+    fontFamily: 'OpenSans_600SemiBold',
+    fontSize: 13,
+    lineHeight: undefined, // Auto
+    letterSpacing: 0,
+  },
   
   // Isi kartu "Geometri pesisir dengan..."
   cardBody: {
@@ -73,6 +121,14 @@ export const Typography = {
     fontFamily: 'OpenSans_600SemiBold',
     fontSize: 11,
     lineHeight: 16,
+    letterSpacing: 0,
+  },
+
+  // Lencana kecil / chip netral
+  badgeSmall: {
+    fontFamily: 'OpenSans_600SemiBold',
+    fontSize: 11,
+    lineHeight: undefined, // Auto
     letterSpacing: 0,
   },
   

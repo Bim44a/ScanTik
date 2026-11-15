@@ -4,7 +4,7 @@ import {
   Text,
   StyleSheet,
   SafeAreaView,
-  FlatList,
+  ScrollView,
   Pressable,
   Alert,
   Image,
@@ -16,6 +16,64 @@ import { Typography } from '@/theme/typography';
 import { getHistory, clearHistory } from '@/storage/history';
 import { HistoryItem } from '@/types/history';
 import { setScanSession } from '@/state/scanSession';
+import AppIcon from '@/components/AppIcon';
+import MatchBadge from '@/components/MatchBadge';
+import NeutralChip from '@/components/NeutralChip';
+import IconCircle from '@/components/IconCircle';
+import SectionHeader from '@/components/SectionHeader';
+import SurfaceCard from '@/components/SurfaceCard';
+
+type HistoryGroupKey = 'today' | 'yesterday' | 'older';
+
+interface HistoryGroup {
+  key: HistoryGroupKey;
+  label: string;
+  items: HistoryItem[];
+}
+
+function pad2(value: number): string {
+  return String(value).padStart(2, '0');
+}
+
+function formatTime(date: Date): string {
+  return `${pad2(date.getHours())}:${pad2(date.getMinutes())}`;
+}
+
+function formatOlderTime(date: Date): string {
+  const day = pad2(date.getDate());
+  const month = date.toLocaleString('id-ID', { month: 'short' });
+  return `${day} ${month}, ${formatTime(date)}`;
+}
+
+function startOfDay(date: Date): number {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+}
+
+function groupHistory(items: HistoryItem[]): HistoryGroup[] {
+  const todayStart = startOfDay(new Date());
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStart = startOfDay(yesterday);
+
+  const groups: HistoryGroup[] = [
+    { key: 'today', label: 'Hari ini', items: [] },
+    { key: 'yesterday', label: 'Kemarin', items: [] },
+    { key: 'older', label: 'Lebih lama', items: [] },
+  ];
+
+  for (const item of items) {
+    const dayStart = startOfDay(new Date(item.createdAt));
+    if (dayStart === todayStart) {
+      groups[0].items.push(item);
+    } else if (dayStart === yesterdayStart) {
+      groups[1].items.push(item);
+    } else {
+      groups[2].items.push(item);
+    }
+  }
+
+  return groups.filter((group) => group.items.length > 0);
+}
 
 export default function HistoryScreen() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -61,52 +119,44 @@ export default function HistoryScreen() {
     ]);
   };
 
-  const formatDateTime = (createdAt: string): string => {
-    const date = new Date(createdAt);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    const dateOnly = (d: Date) => d.toDateString();
-
-    const hour = String(date.getHours()).padStart(2, '0');
-    const minute = String(date.getMinutes()).padStart(2, '0');
-    const time = `${hour}:${minute}`;
-
-    if (dateOnly(date) === dateOnly(today)) {
-      // Hari ini
-      return `Hari ini, ${time}`;
-    } else if (dateOnly(date) === dateOnly(yesterday)) {
-      // Kemarin
-      return `Kemarin, ${time}`;
-    } else {
-      // Tanggal lain
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = date.toLocaleString('id-ID', { month: 'short' });
-      return `${day} ${month}, ${time}`;
-    }
-  };
-
-  const renderItem = ({ item }: { item: HistoryItem }) => {
-    const isUnrecognized = item.predictedClass === 'Negatif';
-    const formattedScore = item.confidenceScore.toFixed(1).replace('.', ',');
-    const formattedDateTime = formatDateTime(item.createdAt);
+  const renderItem = (item: HistoryItem, groupKey: HistoryGroupKey) => {
+    const isUnrecognized = item.motifName === 'Motif tidak dikenali';
+    const date = new Date(item.createdAt);
+    const timeLabel =
+      groupKey === 'older' ? formatOlderTime(date) : formatTime(date);
 
     return (
-      <Pressable style={styles.card} onPress={() => handleOpenResult(item)}>
-        <Image source={{ uri: item.imageUri }} style={styles.thumbnail} resizeMode="cover" />
-        <View style={styles.cardContent}>
-          <Text style={styles.motifName}>{item.motifName}</Text>
-          {!isUnrecognized && (
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>Kecocokan {formattedScore}%</Text>
+      <Pressable key={item.id} onPress={() => handleOpenResult(item)}>
+        <SurfaceCard style={styles.card}>
+          <Image
+            source={{ uri: item.imageUri }}
+            style={styles.thumbnail}
+            resizeMode="cover"
+          />
+          <View style={styles.cardContent}>
+            <Text style={styles.motifName} numberOfLines={1}>
+              {item.motifName}
+            </Text>
+            <View style={styles.metaRow}>
+              {isUnrecognized ? (
+                <NeutralChip />
+              ) : (
+                <MatchBadge score={item.confidenceScore} />
+              )}
+              <Text style={styles.timeText}>{timeLabel}</Text>
             </View>
-          )}
-          <Text style={styles.dateText}>{formattedDateTime}</Text>
-        </View>
+          </View>
+          <AppIcon
+            name="chevron-forward"
+            size={20}
+            color={Colors.textSecondary}
+          />
+        </SurfaceCard>
       </Pressable>
     );
   };
+
+  const groups = groupHistory(history);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -117,26 +167,36 @@ export default function HistoryScreen() {
 
       {history.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>Belum ada riwayat pindaian.</Text>
-          <Pressable onPress={() => router.push('/(tabs)')} style={styles.linkButton}>
-            <Text style={styles.linkText}>Kembali ke Scanner</Text>
+          <IconCircle name="time-outline" />
+          <Text style={styles.emptyTitle}>Belum ada riwayat pindaian</Text>
+          <Text style={styles.emptyText}>
+            Foto yang kamu pindai akan muncul di sini.
+          </Text>
+          <Pressable
+            style={styles.secondaryButton}
+            onPress={() => router.push('/(tabs)')}
+          >
+            <Text style={styles.secondaryButtonText}>Mulai Pindai</Text>
           </Pressable>
         </View>
       ) : (
-        <>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Pindaian terbaru ({history.length})</Text>
-            <Pressable onPress={handleClearHistory}>
-              <Text style={styles.clearText}>Hapus Riwayat</Text>
-            </Pressable>
-          </View>
-          <FlatList
-            data={history}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.list}
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <SectionHeader
+            title="Pindaian terbaru"
+            subtitle={`${history.length} pindaian`}
+            rightLabel="Hapus Riwayat"
+            onRightPress={handleClearHistory}
           />
-        </>
+
+          {groups.map((group) => (
+            <View key={group.key} style={styles.group}>
+              <Text style={styles.groupLabel}>{group.label}</Text>
+              <View style={styles.cardList}>
+                {group.items.map((item) => renderItem(item, group.key))}
+              </View>
+            </View>
+          ))}
+        </ScrollView>
       )}
     </SafeAreaView>
   );
@@ -148,7 +208,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   header: {
-    padding: 20,
+    paddingHorizontal: 16,
+    paddingTop: 24,
   },
   title: {
     ...Typography.screenTitle,
@@ -157,83 +218,85 @@ const styles = StyleSheet.create({
   subtitle: {
     ...Typography.cardBody,
     color: Colors.textSecondary,
-    marginTop: 4,
+    marginTop: 2,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingTop: 24,
+    paddingBottom: 24,
+  },
+  group: {
+    marginTop: 20,
+  },
+  groupLabel: {
+    ...Typography.cardBody,
+    fontSize: 12,
+    color: Colors.textSecondary,
+    marginBottom: 8,
+  },
+  cardList: {
+    gap: 12,
+  },
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  thumbnail: {
+    width: 64,
+    height: 64,
+    borderRadius: 12,
+    backgroundColor: Colors.surfaceElevated,
+  },
+  cardContent: {
+    flex: 1,
+    gap: 4,
+  },
+  motifName: {
+    ...Typography.cardName,
+    color: Colors.textPrimary,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  timeText: {
+    ...Typography.cardBody,
+    color: Colors.textSecondary,
   },
   emptyContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
+    paddingHorizontal: 24,
+    paddingBottom: 40,
+  },
+  emptyTitle: {
+    ...Typography.sectionTitle,
+    color: Colors.textPrimary,
+    marginTop: 24,
+    textAlign: 'center',
   },
   emptyText: {
-    ...Typography.cardBody,
+    ...Typography.detailBody,
     color: Colors.textSecondary,
-    fontSize: 14,
+    marginTop: 8,
+    textAlign: 'center',
   },
-  linkButton: {
-    marginTop: 12,
+  secondaryButton: {
+    alignSelf: 'stretch',
+    marginTop: 24,
+    marginHorizontal: 20,
+    height: 52,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  linkText: {
+  secondaryButtonText: {
     ...Typography.buttonLabel,
     color: Colors.accent,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    ...Typography.cardTitle,
-    color: Colors.textPrimary,
-  },
-  clearText: {
-    ...Typography.cardBody,
-    color: Colors.accent,
-    fontSize: 12,
-  },
-  list: {
-    paddingHorizontal: 20,
-    gap: 12,
-    paddingBottom: 20,
-  },
-  card: {
-    backgroundColor: Colors.surface,
-    borderRadius: 12,
-    padding: 12,
-    flexDirection: 'row',
-    gap: 12,
-  },
-  thumbnail: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-  },
-  cardContent: {
-    flex: 1,
-    justifyContent: 'flex-start',
-    gap: 4,
-  },
-  motifName: {
-    ...Typography.cardTitle,
-    color: Colors.textPrimary,
-  },
-  badge: {
-    alignSelf: 'flex-start',
-    backgroundColor: Colors.accent,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 12,
-  },
-  badgeText: {
-    ...Typography.badge,
-    color: Colors.onBadge,
-    fontSize: 10,
-  },
-  dateText: {
-    ...Typography.metadata,
-    color: Colors.textSecondary,
-    fontSize: 12,
   },
 });

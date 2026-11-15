@@ -18,6 +18,7 @@ export const Colors = {
   
   // Aksen dan status
   accent: '#D4AF37',            // Emas: wordmark "ScanTik", tab aktif, lencana, ikon tab aktif
+  accentSoft: 'rgba(212,175,55,0.12)', // Latar ikon lingkaran dan chip filter aktif
   
   // Teks
   textPrimary: '#F4EBD9',       // Teks utama / judul (cream)

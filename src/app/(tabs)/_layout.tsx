@@ -47,7 +47,7 @@ export default function TabLayout() {
         options={{
           title: 'Katalog',
           tabBarIcon: ({ color }) => (
-            <AppIcon name={color === Colors.accent ? 'book' : 'book-outline'} size={24} color={String(color ?? Colors.textSecondary)} />
+            <AppIcon name={color === Colors.accent ? 'grid' : 'grid-outline'} size={24} color={String(color ?? Colors.textSecondary)} />
           ),
         }}
       />
