@@ -478,3 +478,36 @@ Aturan kerja tambahan untuk agent:
   git diff --stat, findstr). Laporan tanpa bukti ditolak.
 - Setiap perubahan tampilan mengikuti design-report.md. Jangan mengarang
   warna, ukuran, atau teks.
+
+  ## 19. Catatan Perubahan v2.2 (berlaku mengikat)
+
+Status: tahap desain mobile selesai (D1 sampai D5, P1). Mobile final.
+Repositori: github.com/Bim44a/ScanTik (cabang main).
+
+Sumber kebenaran visual: docs/design/design-report.md (v2),
+docs/design/flows.md (v1.1), docs/design/v2/*.png. Jika bertentangan dengan
+bagian 9 PRD di atas, dokumen desain v2 yang berlaku.
+
+Penambahan fitur yang DISETUJUI pemilik (melampaui PRD v2.0):
+- Scanner sebagai beranda: tagline, "Cara kerja", "Motif yang dikenali"
+  (baris geser, ketuk ke Katalog), "Tips foto", "Pindaian terbaru" (maks 3).
+- Zona unggah dapat diketuk seperti tombol.
+- Katalog: filter asal (Semua, Pekalongan, Cirebon) berlaku bersamaan dengan
+  pencarian; grid 2 kolom; lembar bawah detail; parameter rute motif=<slug>.
+- Riwayat: kelompok waktu (Hari ini, Kemarin, Lebih lama), lencana ramping.
+- Help: "Status layanan" otomatis (bukan tombol), foto contoh DO'S dan DON'TS,
+  pratinjau gambar (ImageLightbox) saat foto diketuk.
+- Hasil: tombol "Lihat di Katalog" (kondisi dikenali) dan pratinjau foto.
+- Ikon: @expo/vector-icons (Ionicons). Font: Poppins dan Open Sans.
+
+Aturan baku gambar: setiap gambar memakai pembungkus berukuran tetap
+(aspectRatio atau tinggi pasti pada pembungkus, overflow 'hidden', Image
+absoluteFill dengan resizeMode jelas). Jangan mengandalkan ukuran bawaan berkas.
+Setiap perubahan layar WAJIB diuji visual oleh pemilik di HP.
+
+Platform: Android (Expo Go) adalah target utama dan TIDAK BOLEH berubah
+tampilannya. Web ditambahkan sebagai target kedua dengan fungsi penuh
+(rencana); spesifikasi tampilan web ada di docs/design/web.md.
+
+Hosting API: saat ini laptop pemilik (hotspot HP). Rencana: Railway mendekati
+demo, dengan pengaturan CORS di API untuk web.

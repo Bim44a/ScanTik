@@ -4,11 +4,11 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  SafeAreaView,
   useWindowDimensions,
   ImageSourcePropType,
 } from 'react-native';
 import Constants from 'expo-constants';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '@/theme/colors';
 import { Typography } from '@/theme/typography';
 import SurfaceCard from '@/components/SurfaceCard';
@@ -25,6 +25,7 @@ const RULES: string[] = [
 ];
 
 export default function HelpScreen() {
+  const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const cardWidth = (width - 16 * 2 - 12) / 2;
   const appVersion = Constants.expoConfig?.version || '1.0.0';
@@ -34,8 +35,13 @@ export default function HelpScreen() {
   } | null>(null);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+    <View style={styles.container}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: insets.top + 16 },
+        ]}
+      >
         <View style={styles.header}>
           <Text style={styles.headerLabel}>PUSAT BANTUAN</Text>
           <Text style={styles.title}>Panduan Foto</Text>
@@ -118,7 +124,7 @@ export default function HelpScreen() {
           onClose={() => setLightbox(null)}
         />
       ) : null}
-    </SafeAreaView>
+    </View>
   );
 }
 

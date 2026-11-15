@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   Pressable,
   Alert,
@@ -12,6 +11,7 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { router, useFocusEffect } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppIcon from '@/components/AppIcon';
 import { Colors } from '@/theme/colors';
 import { Typography } from '@/theme/typography';
@@ -33,6 +33,7 @@ import RecentScanRow from '@/components/RecentScanRow';
 import { openHistoryItem } from '@/utils/openHistoryItem';
 
 export default function ScannerScreen() {
+  const insets = useSafeAreaInsets();
   const [isLoading, setIsLoading] = useState(false);
   const [recent, setRecent] = useState<HistoryItem[]>([]);
 
@@ -74,7 +75,7 @@ export default function ScannerScreen() {
 
     // Buka galeri
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: false,
       quality: 1,
     });
@@ -153,8 +154,13 @@ export default function ScannerScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+    <View style={styles.container}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: insets.top + 24 },
+        ]}
+      >
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.welcome}>Selamat datang,</Text>
@@ -267,7 +273,7 @@ export default function ScannerScreen() {
           )}
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 

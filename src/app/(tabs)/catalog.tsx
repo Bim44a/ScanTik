@@ -3,12 +3,12 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   FlatList,
   TextInput,
   useWindowDimensions,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MOTIFS, Motif } from '@/data/motifs';
 import { MOTIF_META } from '@/data/motifMeta';
 import { Colors } from '@/theme/colors';
@@ -21,6 +21,7 @@ import MotifSheet from '@/components/MotifSheet';
 type RegionFilter = 'Semua' | 'Pekalongan' | 'Cirebon';
 
 export default function CatalogScreen() {
+  const insets = useSafeAreaInsets();
   const { motif: motifSlug } = useLocalSearchParams<{ motif?: string }>();
   const { width } = useWindowDimensions();
   const cardWidth = (width - 16 * 2 - 12) / 2;
@@ -61,7 +62,7 @@ export default function CatalogScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top + 16 }]}>
       <View style={styles.header}>
         <Text style={styles.title}>Katalog Motif</Text>
         <Text style={styles.subtitle}>Pelajari 6 motif batik pesisir utara Jawa.</Text>
@@ -115,7 +116,7 @@ export default function CatalogScreen() {
       />
 
       <MotifSheet motif={selectedMotif} onClose={handleCloseSheet} />
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -125,7 +126,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   header: {
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
   },
   title: {
     ...Typography.screenTitle,

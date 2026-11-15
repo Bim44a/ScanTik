@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   Pressable,
   Alert,
@@ -11,6 +10,7 @@ import {
 } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '@/theme/colors';
 import { Typography } from '@/theme/typography';
 import { getHistory, clearHistory } from '@/storage/history';
@@ -76,6 +76,7 @@ function groupHistory(items: HistoryItem[]): HistoryGroup[] {
 }
 
 export default function HistoryScreen() {
+  const insets = useSafeAreaInsets();
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
   const loadHistory = useCallback(async () => {
@@ -159,7 +160,7 @@ export default function HistoryScreen() {
   const groups = groupHistory(history);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top + 16 }]}>
       <View style={styles.header}>
         <Text style={styles.title}>Riwayat Pindaian</Text>
         <Text style={styles.subtitle}>Jejak penemuan motif batik Anda.</Text>
@@ -198,7 +199,7 @@ export default function HistoryScreen() {
           ))}
         </ScrollView>
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -209,7 +210,6 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 16,
-    paddingTop: 24,
   },
   title: {
     ...Typography.screenTitle,
