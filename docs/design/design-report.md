@@ -27,7 +27,7 @@ metadata) | SemiBold 15 (label tombol) | SemiBold 13 (tautan emas) |
 SemiBold 11 (lencana) | Bold 11 (label tab aktif).
 
 ## 3. Jarak dan bentuk (~)
-Margin horizontal layar 16. Jarak antar seksi 24. Jarak antar kartu 12.
+Margin horizontal layar 16 (layar Scanner 24, ~). Jarak antar seksi 24. Jarak antar kartu 12.
 Radius: kartu 16, kartu besar dan lembar bawah 24, tombol 12, kolom cari 16,
 chip dan lencana pill. Tinggi: tombol 52, kolom cari 48, chip filter 36,
 lencana 20, tab bar 64 + safe area bawah.
@@ -35,10 +35,7 @@ lencana 20, tab bar 64 + safe area bawah.
 ## 4. Komponen
 - Tombol utama: buttonPrimary, teks onButton, tinggi 52, radius 12.
 - Tombol sekunder: transparan, garis 1 px accent, teks accent.
-- Lencana "Kecocokan 94%": tinggi 20, padding horizontal 8, pill,
-  latar accent, teks onBadge Open Sans SemiBold 11. Format angka: koma
-  desimal, satu desimal pada layar Hasil (94,9%), bulat tidak perlu di daftar
-  bila datanya bulat; gunakan satu desimal agar konsisten (94,9%).
+- Lencana "Kecocokan 94,9%": tinggi 20, padding horizontal 8, pill, latar accent, teks onBadge Open Sans SemiBold 11. Angka satu desimal dengan koma, sama di daftar dan layar Hasil (contoh 94,9% dan 100,0%).
 - Chip asal: tinggi 24, surfaceElevated, garis border, ikon pin accent,
   teks textSecondary 12.
 - Chip netral "Tidak dikenali": tinggi 20, surfaceElevated, garis border.
