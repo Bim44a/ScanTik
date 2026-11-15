@@ -14,13 +14,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '@/theme/colors';
 import { Typography } from '@/theme/typography';
 import AppIcon from '@/components/AppIcon';
+import ImageLightbox from '@/components/ImageLightbox';
 import { getScanSession } from '@/state/scanSession';
+import { getSlugByClass } from '@/data/motifMeta';
 
 export default function ResultScreen() {
   const { sessionId } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
   const [session, setSession] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(true);
+  const [isLightboxVisible, setIsLightboxVisible] = useState(false);
 
   useEffect(() => {
     if (sessionId) {
@@ -62,6 +65,7 @@ export default function ResultScreen() {
   const imageUri = session.uri;
   const isUnrecognized = predicted_class === 'Negatif';
   const isLowConfidence = !isUnrecognized && confidence_score < 60;
+  const motifSlug = getSlugByClass(predicted_class);
 
   // Format skor ke 1 desimal dengan KOMA (contoh: 94,9%)
   const formattedScore = confidence_score.toFixed(1).replace('.', ',');
@@ -70,13 +74,22 @@ export default function ResultScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: Math.max(20, insets.bottom + 20) }]}>
         {/* Thumbnail foto */}
-        <View style={styles.imageContainer}>
-          <Image
-            source={{ uri: String(imageUri) }}
-            style={styles.thumbnail}
-            resizeMode="contain"
-          />
-        </View>
+        <Pressable
+          onPress={() => setIsLightboxVisible(true)}
+          accessibilityRole="imagebutton"
+          accessibilityLabel="Perbesar foto pindaian"
+        >
+          <View style={styles.imageContainer}>
+            <Image
+              source={{ uri: String(imageUri) }}
+              style={StyleSheet.absoluteFill}
+              resizeMode="contain"
+            />
+            <View style={styles.expandHint}>
+              <AppIcon name="expand-outline" size={18} color={Colors.textPrimary} />
+            </View>
+          </View>
+        </Pressable>
 
         {/* Kondisi 3: TIDAK DIKENALI */}
         {isUnrecognized ? (
@@ -158,10 +171,32 @@ export default function ResultScreen() {
                 <AppIcon name="scan-outline" size={20} color={Colors.onPrimaryButton} />
                 <Text style={styles.primaryButtonText}>Pindai Lagi</Text>
               </Pressable>
+              {motifSlug ? (
+                <Pressable
+                  style={styles.secondaryButton}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/(tabs)/catalog',
+                      params: { motif: motifSlug },
+                    })
+                  }
+                >
+                  <Text style={styles.secondaryButtonText}>Lihat di Katalog</Text>
+                </Pressable>
+              ) : null}
             </View>
           </View>
         )}
       </ScrollView>
+
+      {isLightboxVisible ? (
+        <ImageLightbox
+          visible
+          source={{ uri: String(imageUri) }}
+          caption="Foto pindaian"
+          onClose={() => setIsLightboxVisible(false)}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -190,9 +225,17 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: Colors.surface,
   },
-  thumbnail: {
-    width: '100%',
-    height: '100%',
+  expandHint: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.surface,
+    opacity: 0.85,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   card: {
     backgroundColor: Colors.surface,

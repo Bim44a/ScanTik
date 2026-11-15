@@ -41,6 +41,11 @@ Keadaan:
 - Dikenali: tombol "Lihat di Katalog" ke tab Katalog, modal motif terbuka.
 - Sesi tidak ada: "Hasil tidak tersedia." + tombol ke Scanner.
 - Riwayat disimpan HANYA saat pindai baru, bukan saat membuka dari riwayat.
+- Foto pindaian: ketuk untuk pratinjau layar penuh (ImageLightbox); ikon
+  expand-outline kecil sebagai petunjuk. Menutup: ketuk layar, tombol close,
+  atau tombol kembali Android.
+- "Lihat di Katalog": hanya pada kondisi dikenali (skor berapa pun); membuka
+  tab Katalog dengan lembar detail motif tersebut.
 
 ## 4. Katalog
 - Filter asal (chip): Semua, Pekalongan, Cirebon. Satu chip aktif.

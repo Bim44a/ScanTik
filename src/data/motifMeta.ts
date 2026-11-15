@@ -33,3 +33,11 @@ export function getMotifBySlug(slug: string): Motif | undefined {
 export function getRegion(origin: string): string {
   return origin.split('(')[0].trim();
 }
+
+/**
+ * Mengambil slug motif berdasarkan kelas.
+ * Mengembalikan undefined untuk kelas yang tidak dipetakan (termasuk "Negatif").
+ */
+export function getSlugByClass(className: string): string | undefined {
+  return MOTIF_META[className]?.slug;
+}
