@@ -18,6 +18,7 @@ import AppIcon from '@/components/AppIcon';
 import FilterChip from '@/components/FilterChip';
 import MotifCard from '@/components/MotifCard';
 import MotifSheet from '@/components/MotifSheet';
+import { WebDocumentTitle } from '@/components/ResponsiveContainer';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 
 type RegionFilter = 'Semua' | 'Pekalongan' | 'Cirebon';
@@ -78,27 +79,17 @@ export default function CatalogScreen() {
     }
   };
 
-  return (
-    <View
-      style={[
-        styles.container,
-        { paddingTop: insets.top + 16 },
-        isWeb && styles.webContainer,
-        isWeb && { maxWidth: webMaxWidth },
-      ]}
-    >
-      <View style={[styles.header, isWeb && { paddingHorizontal: webPadding }]}>
+  // Di web seluruh header ikut digulir bersama grid, sehingga scrollbar
+  // membentang penuh. Di Android header tetap berada di atas FlatList.
+  const headerBlock = (
+    <>
+      <View style={[styles.header, isWeb && styles.headerWeb]}>
         <Text style={styles.title}>Katalog Motif</Text>
         <Text style={styles.subtitle}>Pelajari 6 motif batik pesisir utara Jawa.</Text>
       </View>
 
       {/* Search Bar */}
-      <View
-        style={[
-          styles.searchBar,
-          isWeb && { marginHorizontal: webPadding },
-        ]}
-      >
+      <View style={[styles.searchBar, isWeb && styles.searchBarWeb]}>
         <AppIcon name="search-outline" size={20} color={Colors.textSecondary} />
         <TextInput
           style={styles.searchInput}
@@ -110,12 +101,7 @@ export default function CatalogScreen() {
       </View>
 
       {/* Filter Bar */}
-      <View
-        style={[
-          styles.filterBar,
-          isWeb && { paddingHorizontal: webPadding },
-        ]}
-      >
+      <View style={[styles.filterBar, isWeb && styles.filterBarWeb]}>
         {(['Semua', 'Pekalongan', 'Cirebon'] as RegionFilter[]).map((r) => (
           <FilterChip
             key={r}
@@ -127,14 +113,17 @@ export default function CatalogScreen() {
       </View>
 
       {/* Count */}
-      <Text
-        style={[
-          styles.countText,
-          isWeb && { paddingHorizontal: webPadding },
-        ]}
-      >
+      <Text style={[styles.countText, isWeb && styles.countTextWeb]}>
         {filteredMotifs.length} motif
       </Text>
+    </>
+  );
+
+  return (
+    <View style={[styles.container, !isWeb && { paddingTop: insets.top + 16 }]}>
+      <WebDocumentTitle title="Katalog" />
+
+      {!isWeb ? headerBlock : null}
 
       {/* Grid */}
       <FlatList
@@ -152,9 +141,14 @@ export default function CatalogScreen() {
         numColumns={columns}
         columnWrapperStyle={styles.columnWrapper}
         contentContainerStyle={[
-          styles.list,
-          isWeb && { paddingHorizontal: webPadding },
+          isWeb ? styles.listWeb : styles.list,
+          isWeb && {
+            maxWidth: webMaxWidth,
+            paddingHorizontal: webPadding,
+            paddingTop: insets.top + 16,
+          },
         ]}
+        ListHeaderComponent={isWeb ? headerBlock : undefined}
         ListEmptyComponent={
           <Text style={styles.emptyText}>Motif tidak ditemukan</Text>
         }
@@ -170,13 +164,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
-  webContainer: {
-    width: '100%',
-    alignSelf: 'center',
-  },
   header: {
     paddingHorizontal: 16,
     paddingBottom: 16,
+  },
+  headerWeb: {
+    paddingHorizontal: 0,
   },
   title: {
     ...Typography.screenTitle,
@@ -199,6 +192,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
+  searchBarWeb: {
+    marginHorizontal: 0,
+  },
   searchInput: {
     flex: 1,
     ...Typography.cardBody,
@@ -210,12 +206,18 @@ const styles = StyleSheet.create({
     marginTop: 20,
     gap: 8,
   },
+  filterBarWeb: {
+    paddingHorizontal: 0,
+  },
   countText: {
     ...Typography.cardBody,
     color: Colors.textSecondary,
     paddingHorizontal: 16,
     marginTop: 16,
     marginBottom: 8,
+  },
+  countTextWeb: {
+    paddingHorizontal: 0,
   },
   listContainer: {
     flex: 1,
@@ -226,6 +228,11 @@ const styles = StyleSheet.create({
   },
   list: {
     paddingHorizontal: 16,
+    paddingBottom: 120,
+  },
+  listWeb: {
+    width: '100%',
+    alignSelf: 'center',
     paddingBottom: 120,
   },
   emptyText: {

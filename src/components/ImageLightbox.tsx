@@ -7,6 +7,8 @@ import {
   Pressable,
   Image,
   ImageSourcePropType,
+  Platform,
+  useWindowDimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '@/theme/colors';
@@ -24,7 +26,16 @@ export interface ImageLightboxProps {
  * Pratinjau gambar layar penuh tanpa zoom.
  * Tutup lewat ketuk mana saja, tombol close, atau kembali Android.
  */
-export default function ImageLightbox({
+export default function ImageLightbox(props: ImageLightboxProps) {
+  if (Platform.OS === 'web') {
+    return <WebImageLightbox {...props} />;
+  }
+
+  return <NativeImageLightbox {...props} />;
+}
+
+/** Cabang Android/iOS: susunan dan gaya lama tidak berubah. */
+function NativeImageLightbox({
   visible,
   source,
   caption,
@@ -62,6 +73,60 @@ export default function ImageLightbox({
   );
 }
 
+/** Cabang web: lebar maksimum 90% layar, tinggi maksimum 85% layar. */
+function WebImageLightbox({
+  visible,
+  source,
+  caption,
+  onClose,
+}: ImageLightboxProps) {
+  const insets = useSafeAreaInsets();
+  const { width, height } = useWindowDimensions();
+
+  // Sisihkan ruang keterangan agar gambar dan teks tetap utuh.
+  const captionReserve = caption ? 56 : 0;
+  const frameWidth = width * 0.9;
+  const frameHeight = Math.max(160, height * 0.85 - captionReserve);
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      statusBarTranslucent
+      onRequestClose={onClose}
+    >
+      <Pressable style={styles.overlay} onPress={onClose}>
+        <View style={styles.webContent}>
+          <View
+            style={[
+              styles.webImageFrame,
+              { width: frameWidth, height: frameHeight },
+            ]}
+          >
+            <Image
+              source={source}
+              style={StyleSheet.absoluteFill}
+              resizeMode="contain"
+            />
+          </View>
+          {caption ? <Text style={styles.caption}>{caption}</Text> : null}
+        </View>
+
+        <Pressable
+          onPress={onClose}
+          hitSlop={6}
+          accessibilityRole="button"
+          accessibilityLabel="Tutup pratinjau foto"
+          style={[styles.closeButton, { top: insets.top + 8 }]}
+        >
+          <AppIcon name="close" size={28} color={Colors.textPrimary} />
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+}
+
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
@@ -80,6 +145,17 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     borderRadius: 12,
+  },
+  webContent: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    gap: 16,
+  },
+  webImageFrame: {
+    borderRadius: 12,
+    overflow: 'hidden',
   },
   caption: {
     ...Typography.cardBody,

@@ -21,6 +21,9 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
+        // Latar scene navigator di web harus gelap agar area di luar wadah
+        // konten tidak menampilkan latar terang bawaan.
+        ...(isWeb ? { sceneStyle: { backgroundColor: Colors.background } } : null),
         tabBarActiveTintColor: Colors.tabActive,
         tabBarInactiveTintColor: Colors.tabInactive,
         tabBarStyle: isDesktopWeb
@@ -104,5 +107,6 @@ const styles = StyleSheet.create({
   },
   webContent: {
     flex: 1,
+    backgroundColor: Colors.background,
   },
 });

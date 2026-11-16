@@ -24,6 +24,7 @@ import NeutralChip from '@/components/NeutralChip';
 import IconCircle from '@/components/IconCircle';
 import SectionHeader from '@/components/SectionHeader';
 import SurfaceCard from '@/components/SurfaceCard';
+import { WebDocumentTitle } from '@/components/ResponsiveContainer';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 
 type HistoryGroupKey = 'today' | 'yesterday' | 'older';
@@ -181,57 +182,87 @@ export default function HistoryScreen() {
 
   const groups = groupHistory(history);
 
-  return (
-    <View
-      style={[
-        styles.container,
-        { paddingTop: insets.top + 16 },
-        isWeb && styles.webContainer,
-        isWeb && { maxWidth: webMaxWidth, paddingHorizontal: webPadding },
-      ]}
-    >
-      <View style={[styles.header, isWeb && styles.headerWeb]}>
-        <Text style={styles.title}>Riwayat Pindaian</Text>
-        <Text style={styles.subtitle}>Jejak penemuan motif batik Anda.</Text>
-      </View>
+  const headerBlock = (
+    <View style={[styles.header, isWeb && styles.headerWeb]}>
+      <Text style={styles.title}>Riwayat Pindaian</Text>
+      <Text style={styles.subtitle}>Jejak penemuan motif batik Anda.</Text>
+    </View>
+  );
 
-      {history.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <IconCircle name="time-outline" />
-          <Text style={styles.emptyTitle}>Belum ada riwayat pindaian</Text>
-          <Text style={styles.emptyText}>
-            Foto yang kamu pindai akan muncul di sini.
-          </Text>
-          <Pressable
-            style={styles.secondaryButton}
-            onPress={() => router.push('/(tabs)')}
-          >
-            <Text style={styles.secondaryButtonText}>Mulai Pindai</Text>
-          </Pressable>
-        </View>
+  const emptyBlock = (
+    <View style={styles.emptyContainer}>
+      <IconCircle name="time-outline" />
+      <Text style={styles.emptyTitle}>Belum ada riwayat pindaian</Text>
+      <Text style={styles.emptyText}>
+        Foto yang kamu pindai akan muncul di sini.
+      </Text>
+      <Pressable
+        style={styles.secondaryButton}
+        onPress={() => router.push('/(tabs)')}
+      >
+        <Text style={styles.secondaryButtonText}>Mulai Pindai</Text>
+      </Pressable>
+    </View>
+  );
+
+  const sectionHeader = (
+    <SectionHeader
+      title="Pindaian terbaru"
+      subtitle={`${history.length} pindaian`}
+      rightLabel="Hapus Riwayat"
+      onRightPress={handleClearHistory}
+    />
+  );
+
+  const historyList = (
+    <>
+      {isWeb ? (
+        <View style={styles.sectionHeaderWeb}>{sectionHeader}</View>
       ) : (
+        sectionHeader
+      )}
+
+      {groups.map((group) => (
+        <View key={group.key} style={styles.group}>
+          <Text style={styles.groupLabel}>{group.label}</Text>
+          <View style={[styles.cardList, isWebGrid && styles.cardGrid]}>
+            {group.items.map((item) => renderItem(item, group.key))}
+          </View>
+        </View>
+      ))}
+    </>
+  );
+
+  return (
+    <View style={[styles.container, !isWeb && { paddingTop: insets.top + 16 }]}>
+      <WebDocumentTitle title="Riwayat" />
+      {isWeb ? (
         <ScrollView
           contentContainerStyle={[
             styles.scrollContent,
-            isWeb && styles.scrollContentWeb,
+            styles.scrollContentWeb,
+            {
+              maxWidth: webMaxWidth,
+              paddingHorizontal: webPadding,
+              paddingTop: insets.top + 16,
+            },
+            history.length === 0 && styles.scrollEmptyWeb,
           ]}
         >
-          <SectionHeader
-            title="Pindaian terbaru"
-            subtitle={`${history.length} pindaian`}
-            rightLabel="Hapus Riwayat"
-            onRightPress={handleClearHistory}
-          />
-
-          {groups.map((group) => (
-            <View key={group.key} style={styles.group}>
-              <Text style={styles.groupLabel}>{group.label}</Text>
-              <View style={[styles.cardList, isWebGrid && styles.cardGrid]}>
-                {group.items.map((item) => renderItem(item, group.key))}
-              </View>
-            </View>
-          ))}
+          {headerBlock}
+          {history.length === 0 ? emptyBlock : historyList}
         </ScrollView>
+      ) : (
+        <>
+          {headerBlock}
+          {history.length === 0 ? (
+            emptyBlock
+          ) : (
+            <ScrollView contentContainerStyle={styles.scrollContent}>
+              {historyList}
+            </ScrollView>
+          )}
+        </>
       )}
     </View>
   );
@@ -241,10 +272,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
-  },
-  webContainer: {
-    width: '100%',
-    alignSelf: 'center',
   },
   header: {
     paddingHorizontal: 16,
@@ -267,7 +294,15 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   scrollContentWeb: {
+    width: '100%',
+    alignSelf: 'center',
     paddingHorizontal: 0,
+  },
+  scrollEmptyWeb: {
+    flexGrow: 1,
+  },
+  sectionHeaderWeb: {
+    marginTop: 24,
   },
   group: {
     marginTop: 20,
