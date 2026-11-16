@@ -4,6 +4,7 @@ import {
   Text,
   StyleSheet,
   ScrollView,
+  Platform,
   useWindowDimensions,
   ImageSourcePropType,
 } from 'react-native';
@@ -16,7 +17,9 @@ import SectionHeader from '@/components/SectionHeader';
 import PhotoExampleCard from '@/components/PhotoExampleCard';
 import StatusRow from '@/components/StatusRow';
 import ImageLightbox from '@/components/ImageLightbox';
+import ResponsiveContainer from '@/components/ResponsiveContainer';
 import { doPhoto, dontPhoto } from '@/data/helpPhotos';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 
 const RULES: string[] = [
   'Cahaya terang dan merata',
@@ -27,93 +30,124 @@ const RULES: string[] = [
 export default function HelpScreen() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const cardWidth = (width - 16 * 2 - 12) / 2;
+  const breakpoint = useBreakpoint();
+  const isWeb = Platform.OS === 'web';
+  const isDesktopWeb = isWeb && breakpoint === 'desktop';
+
+  const webMaxWidth = isDesktopWeb ? 960 : 720;
+  const webPadding =
+    breakpoint === 'mobile' ? 16 : breakpoint === 'tablet' ? 24 : 32;
+  const sidebarWidth = isDesktopWeb ? 240 : 0;
+  const availableWidth = Math.max(
+    0,
+    Math.min(width - sidebarWidth, webMaxWidth) - webPadding * 2
+  );
+  const cardWidth = isWeb
+    ? (availableWidth - 12) / 2
+    : (width - 16 * 2 - 12) / 2;
   const appVersion = Constants.expoConfig?.version || '1.0.0';
   const [lightbox, setLightbox] = useState<{
     source: ImageSourcePropType;
     caption: string;
   } | null>(null);
 
+  const rulesSection = (
+    <View style={[styles.section, isDesktopWeb && styles.desktopSection]}>
+      <SectionHeader title="Tiga Aturan Wajib" />
+      <SurfaceCard style={styles.rulesCard}>
+        {RULES.map((rule, index) => (
+          <View
+            key={rule}
+            style={[styles.rule, index > 0 && styles.ruleDivider]}
+          >
+            <View style={styles.ruleNumber}>
+              <Text style={styles.ruleNumberText}>{index + 1}</Text>
+            </View>
+            <Text style={styles.ruleText}>{rule}</Text>
+          </View>
+        ))}
+      </SurfaceCard>
+    </View>
+  );
+
+  const infoSection = (
+    <View style={[styles.section, isDesktopWeb && styles.desktopSection]}>
+      <SectionHeader title="Informasi" />
+      <SurfaceCard style={styles.infoCard}>
+        <StatusRow />
+        <View style={styles.divider} />
+        <View style={styles.infoRow}>
+          <Text style={styles.infoLabel}>Versi aplikasi</Text>
+          <Text style={styles.infoValue}>{appVersion}</Text>
+        </View>
+      </SurfaceCard>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
+          isWeb && styles.scrollContentWeb,
           { paddingTop: insets.top + 16 },
         ]}
       >
-        <View style={styles.header}>
-          <Text style={styles.headerLabel}>PUSAT BANTUAN</Text>
-          <Text style={styles.title}>Panduan Foto</Text>
-          <Text style={styles.subtitle}>
-            Kenali batik lebih akurat, dimulai dari foto yang tepat.
-          </Text>
-        </View>
+        <ResponsiveContainer maxWidth={webMaxWidth}>
+          <View style={styles.header}>
+            <Text style={styles.headerLabel}>PUSAT BANTUAN</Text>
+            <Text style={styles.title}>Panduan Foto</Text>
+            <Text style={styles.subtitle}>
+              Kenali batik lebih akurat, dimulai dari foto yang tepat.
+            </Text>
+          </View>
 
-        {/* Contoh foto */}
-        <View style={styles.exampleRow}>
-          <PhotoExampleCard
-            title="Cara yang Benar"
-            badgeLabel="DO'S"
-            badgeIcon="checkmark"
-            variant="accent"
-            caption="Kain rata, cahaya terang, dan motif terlihat jelas."
-            width={cardWidth}
-            photo={doPhoto}
-            onOpenPhoto={() =>
-              setLightbox({
-                source: doPhoto,
-                caption: 'Kain rata, cahaya terang, dan motif terlihat jelas.',
-              })
-            }
-          />
-          <PhotoExampleCard
-            title="Hindari"
-            badgeLabel="DON'TS"
-            badgeIcon="close"
-            variant="neutral"
-            caption="Kain terlipat, gelap, atau buram akan menurunkan akurasi AI."
-            width={cardWidth}
-            photo={dontPhoto}
-            onOpenPhoto={() =>
-              setLightbox({
-                source: dontPhoto,
-                caption: 'Kain terlipat, gelap, atau buram akan menurunkan akurasi AI.',
-              })
-            }
-          />
-        </View>
+          {/* Contoh foto */}
+          <View style={styles.exampleRow}>
+            <PhotoExampleCard
+              title="Cara yang Benar"
+              badgeLabel="DO'S"
+              badgeIcon="checkmark"
+              variant="accent"
+              caption="Kain rata, cahaya terang, dan motif terlihat jelas."
+              width={cardWidth}
+              photo={doPhoto}
+              onOpenPhoto={() =>
+                setLightbox({
+                  source: doPhoto,
+                  caption: 'Kain rata, cahaya terang, dan motif terlihat jelas.',
+                })
+              }
+            />
+            <PhotoExampleCard
+              title="Hindari"
+              badgeLabel="DON'TS"
+              badgeIcon="close"
+              variant="neutral"
+              caption="Kain terlipat, gelap, atau buram akan menurunkan akurasi AI."
+              width={cardWidth}
+              photo={dontPhoto}
+              onOpenPhoto={() =>
+                setLightbox({
+                  source: dontPhoto,
+                  caption: 'Kain terlipat, gelap, atau buram akan menurunkan akurasi AI.',
+                })
+              }
+            />
+          </View>
 
-        {/* Tiga Aturan Wajib */}
-        <View style={styles.section}>
-          <SectionHeader title="Tiga Aturan Wajib" />
-          <SurfaceCard style={styles.rulesCard}>
-            {RULES.map((rule, index) => (
-              <View
-                key={rule}
-                style={[styles.rule, index > 0 && styles.ruleDivider]}
-              >
-                <View style={styles.ruleNumber}>
-                  <Text style={styles.ruleNumberText}>{index + 1}</Text>
-                </View>
-                <Text style={styles.ruleText}>{rule}</Text>
-              </View>
-            ))}
-          </SurfaceCard>
-        </View>
-
-        {/* Informasi */}
-        <View style={styles.section}>
-          <SectionHeader title="Informasi" />
-          <SurfaceCard style={styles.infoCard}>
-            <StatusRow />
-            <View style={styles.divider} />
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Versi aplikasi</Text>
-              <Text style={styles.infoValue}>{appVersion}</Text>
+          {isDesktopWeb ? (
+            <View style={styles.desktopSections}>
+              {rulesSection}
+              {infoSection}
             </View>
-          </SurfaceCard>
-        </View>
+          ) : (
+            <>
+              {rulesSection}
+              {infoSection}
+            </>
+          )}
+        </ResponsiveContainer>
       </ScrollView>
 
       {lightbox ? (
@@ -137,6 +171,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 24,
     paddingBottom: 120,
+  },
+  scrollContentWeb: {
+    paddingHorizontal: 0,
   },
   header: {
     marginBottom: 24,
@@ -163,6 +200,14 @@ const styles = StyleSheet.create({
   },
   section: {
     marginTop: 24,
+  },
+  desktopSections: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 24,
+  },
+  desktopSection: {
+    flex: 1,
   },
   rulesCard: {
     marginTop: 12,

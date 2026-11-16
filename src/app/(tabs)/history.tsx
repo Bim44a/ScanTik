@@ -7,6 +7,8 @@ import {
   Pressable,
   Alert,
   Image,
+  Platform,
+  useWindowDimensions,
 } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { router } from 'expo-router';
@@ -22,6 +24,7 @@ import NeutralChip from '@/components/NeutralChip';
 import IconCircle from '@/components/IconCircle';
 import SectionHeader from '@/components/SectionHeader';
 import SurfaceCard from '@/components/SurfaceCard';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 
 type HistoryGroupKey = 'today' | 'yesterday' | 'older';
 
@@ -77,6 +80,21 @@ function groupHistory(items: HistoryItem[]): HistoryGroup[] {
 
 export default function HistoryScreen() {
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const breakpoint = useBreakpoint();
+  const isWeb = Platform.OS === 'web';
+  const isWebGrid = isWeb && breakpoint !== 'mobile';
+
+  const webMaxWidth = breakpoint === 'tablet' ? 720 : 1120;
+  const webPadding =
+    breakpoint === 'mobile' ? 16 : breakpoint === 'tablet' ? 24 : 32;
+  const sidebarWidth = isWeb && breakpoint === 'desktop' ? 240 : 0;
+  const availableWidth = Math.max(
+    0,
+    Math.min(width - sidebarWidth, webMaxWidth) - webPadding * 2
+  );
+  const cardWidth = isWebGrid ? (availableWidth - 12) / 2 : undefined;
+
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
   const loadHistory = useCallback(async () => {
@@ -127,7 +145,11 @@ export default function HistoryScreen() {
       groupKey === 'older' ? formatOlderTime(date) : formatTime(date);
 
     return (
-      <Pressable key={item.id} onPress={() => handleOpenResult(item)}>
+      <Pressable
+        key={item.id}
+        onPress={() => handleOpenResult(item)}
+        style={isWebGrid ? { width: cardWidth } : undefined}
+      >
         <SurfaceCard style={styles.card}>
           <Image
             source={{ uri: item.imageUri }}
@@ -160,8 +182,15 @@ export default function HistoryScreen() {
   const groups = groupHistory(history);
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + 16 }]}>
-      <View style={styles.header}>
+    <View
+      style={[
+        styles.container,
+        { paddingTop: insets.top + 16 },
+        isWeb && styles.webContainer,
+        isWeb && { maxWidth: webMaxWidth, paddingHorizontal: webPadding },
+      ]}
+    >
+      <View style={[styles.header, isWeb && styles.headerWeb]}>
         <Text style={styles.title}>Riwayat Pindaian</Text>
         <Text style={styles.subtitle}>Jejak penemuan motif batik Anda.</Text>
       </View>
@@ -181,7 +210,12 @@ export default function HistoryScreen() {
           </Pressable>
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView
+          contentContainerStyle={[
+            styles.scrollContent,
+            isWeb && styles.scrollContentWeb,
+          ]}
+        >
           <SectionHeader
             title="Pindaian terbaru"
             subtitle={`${history.length} pindaian`}
@@ -192,7 +226,7 @@ export default function HistoryScreen() {
           {groups.map((group) => (
             <View key={group.key} style={styles.group}>
               <Text style={styles.groupLabel}>{group.label}</Text>
-              <View style={styles.cardList}>
+              <View style={[styles.cardList, isWebGrid && styles.cardGrid]}>
                 {group.items.map((item) => renderItem(item, group.key))}
               </View>
             </View>
@@ -208,8 +242,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
+  webContainer: {
+    width: '100%',
+    alignSelf: 'center',
+  },
   header: {
     paddingHorizontal: 16,
+  },
+  headerWeb: {
+    paddingHorizontal: 0,
   },
   title: {
     ...Typography.screenTitle,
@@ -225,6 +266,9 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     paddingBottom: 24,
   },
+  scrollContentWeb: {
+    paddingHorizontal: 0,
+  },
   group: {
     marginTop: 20,
   },
@@ -236,6 +280,10 @@ const styles = StyleSheet.create({
   },
   cardList: {
     gap: 12,
+  },
+  cardGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
   },
   card: {
     flexDirection: 'row',

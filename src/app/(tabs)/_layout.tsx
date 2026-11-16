@@ -1,26 +1,37 @@
 import { Tabs } from 'expo-router';
-import { Text } from 'react-native';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '@/theme/colors';
 import { Typography } from '@/theme/typography';
 import AppIcon from '@/components/AppIcon';
+import WebSidebar from '@/components/WebSidebar';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
-  
-  return (
+  const breakpoint = useBreakpoint();
+
+  // SDK 58 menyediakan tabBarPosition: 'left', tetapi tidak ada slot untuk
+  // wordmark "ScanTik". Desktop web memakai sidebar kustom dan tab bar
+  // bawah disembunyikan.
+  const isDesktopWeb = Platform.OS === 'web' && breakpoint === 'desktop';
+  const isWeb = Platform.OS === 'web';
+
+  const tabs = (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: Colors.tabActive,
         tabBarInactiveTintColor: Colors.tabInactive,
-        tabBarStyle: {
-          backgroundColor: Colors.background,
-          borderTopColor: Colors.border,
-          height: 60 + insets.bottom,
-          paddingBottom: insets.bottom + 8,
-          paddingTop: 8,
-        },
+        tabBarStyle: isDesktopWeb
+          ? styles.hiddenTabBar
+          : {
+              backgroundColor: Colors.background,
+              borderTopColor: Colors.border,
+              height: 60 + insets.bottom,
+              paddingBottom: insets.bottom + 8,
+              paddingTop: 8,
+            },
         tabBarLabel: ({ focused, color, children }) => (
           <Text
             style={{
@@ -71,4 +82,27 @@ export default function TabLayout() {
       />
     </Tabs>
   );
+
+  if (!isWeb) return tabs;
+
+  return (
+    <View style={styles.webShell}>
+      {isDesktopWeb ? <WebSidebar /> : null}
+      <View style={styles.webContent}>{tabs}</View>
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  hiddenTabBar: {
+    display: 'none',
+  },
+  webShell: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: Colors.background,
+  },
+  webContent: {
+    flex: 1,
+  },
+});

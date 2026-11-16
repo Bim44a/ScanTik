@@ -8,6 +8,7 @@ import {
   Image,
   Pressable,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,12 +16,18 @@ import { Colors } from '@/theme/colors';
 import { Typography } from '@/theme/typography';
 import AppIcon from '@/components/AppIcon';
 import ImageLightbox from '@/components/ImageLightbox';
+import ResponsiveContainer from '@/components/ResponsiveContainer';
 import { getScanSession } from '@/state/scanSession';
 import { getSlugByClass } from '@/data/motifMeta';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 
 export default function ResultScreen() {
   const { sessionId } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
+  const breakpoint = useBreakpoint();
+  const isWeb = Platform.OS === 'web';
+  const isDesktopWeb = isWeb && breakpoint === 'desktop';
+  const webMaxWidth = breakpoint === 'tablet' ? 720 : 1120;
   const [session, setSession] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(true);
   const [isLightboxVisible, setIsLightboxVisible] = useState(false);
@@ -70,123 +77,148 @@ export default function ResultScreen() {
   // Format skor ke 1 desimal dengan KOMA (contoh: 94,9%)
   const formattedScore = confidence_score.toFixed(1).replace('.', ',');
 
+  const photoBlock = (
+    <Pressable
+      onPress={() => setIsLightboxVisible(true)}
+      accessibilityRole="imagebutton"
+      accessibilityLabel="Perbesar foto pindaian"
+    >
+      <View style={styles.imageContainer}>
+        <Image
+          source={{ uri: String(imageUri) }}
+          style={StyleSheet.absoluteFill}
+          resizeMode="contain"
+        />
+        <View style={styles.expandHint}>
+          <AppIcon name="expand-outline" size={18} color={Colors.textPrimary} />
+        </View>
+      </View>
+    </Pressable>
+  );
+
+  const resultCard = isUnrecognized ? (
+    <View style={styles.card}>
+      <Text style={styles.unrecognizedTitle}>Motif tidak dikenali</Text>
+      <Text style={styles.unrecognizedText}>
+        Motif ini belum termasuk 6 motif yang dikenali aplikasi.
+      </Text>
+
+      <View style={styles.buttonGroup}>
+        <Pressable style={styles.secondaryButton} onPress={handleOpenHelp}>
+          <AppIcon name="help-circle-outline" size={20} color={Colors.accent} />
+          <Text style={styles.secondaryButtonText}>Buka Panduan Foto</Text>
+        </Pressable>
+        <Pressable style={styles.primaryButton} onPress={handleScanAgain}>
+          <AppIcon name="scan-outline" size={20} color={Colors.onPrimaryButton} />
+          <Text style={styles.primaryButtonText}>Pindai Lagi</Text>
+        </Pressable>
+      </View>
+    </View>
+  ) : (
+    /* Kondisi 1 & 2: DIKENALI */
+    <View style={styles.card}>
+      {/* Lencana Kecocokan */}
+      <View style={styles.badge}>
+        <Text style={styles.badgeText}>Kecocokan {formattedScore}%</Text>
+      </View>
+
+      {/* Nama Motif */}
+      <Text style={styles.motifTitle}>
+        {motif_details?.name || predicted_class}
+      </Text>
+
+      {/* Kondisi 2: Peringatan Skor < 60 */}
+      {isLowConfidence && (
+        <View style={styles.warningCard}>
+          <AppIcon name="alert-circle-outline" size={24} color={Colors.accent} />
+          <Text style={styles.warningText}>
+            Tingkat kemiripan rendah. Pastikan foto mengikuti panduan di Tab Bantuan.
+          </Text>
+        </View>
+      )}
+
+      {/* Detail Motif (Asal, Filosofi, Ciri) */}
+      {motif_details && (
+        <View style={styles.detailsContainer}>
+          {motif_details.origin ? (
+            <View style={styles.detailSection}>
+              <Text style={styles.detailLabel}>Asal</Text>
+              <Text style={styles.detailValue}>{motif_details.origin}</Text>
+            </View>
+          ) : null}
+
+          {motif_details.philosophy ? (
+            <View style={styles.detailSection}>
+              <Text style={styles.detailLabel}>Filosofi</Text>
+              <Text style={styles.detailValue}>{motif_details.philosophy}</Text>
+            </View>
+          ) : null}
+
+          {motif_details.characteristics ? (
+            <View style={styles.detailSection}>
+              <Text style={styles.detailLabel}>Ciri</Text>
+              <Text style={styles.detailValue}>{motif_details.characteristics}</Text>
+            </View>
+          ) : null}
+        </View>
+      )}
+
+      {/* Tombol Aksi */}
+      <View style={styles.buttonGroup}>
+        {isLowConfidence && (
+          <Pressable style={styles.secondaryButton} onPress={handleOpenHelp}>
+            <AppIcon name="help-circle-outline" size={20} color={Colors.accent} />
+            <Text style={styles.secondaryButtonText}>Buka Panduan Foto</Text>
+          </Pressable>
+        )}
+        <Pressable style={styles.primaryButton} onPress={handleScanAgain}>
+          <AppIcon name="scan-outline" size={20} color={Colors.onPrimaryButton} />
+          <Text style={styles.primaryButtonText}>Pindai Lagi</Text>
+        </Pressable>
+        {motifSlug ? (
+          <Pressable
+            style={styles.secondaryButton}
+            onPress={() =>
+              router.push({
+                pathname: '/(tabs)/catalog',
+                params: { motif: motifSlug },
+              })
+            }
+          >
+            <Text style={styles.secondaryButtonText}>Lihat di Katalog</Text>
+          </Pressable>
+        ) : null}
+      </View>
+    </View>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: Math.max(20, insets.bottom + 20) }]}>
-        {/* Thumbnail foto */}
-        <Pressable
-          onPress={() => setIsLightboxVisible(true)}
-          accessibilityRole="imagebutton"
-          accessibilityLabel="Perbesar foto pindaian"
-        >
-          <View style={styles.imageContainer}>
-            <Image
-              source={{ uri: String(imageUri) }}
-              style={StyleSheet.absoluteFill}
-              resizeMode="contain"
-            />
-            <View style={styles.expandHint}>
-              <AppIcon name="expand-outline" size={18} color={Colors.textPrimary} />
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContent,
+          isWeb && styles.scrollContentWeb,
+          { paddingBottom: Math.max(20, insets.bottom + 20) },
+        ]}
+      >
+        <ResponsiveContainer maxWidth={webMaxWidth}>
+          {isDesktopWeb ? (
+            <View style={styles.desktopRow}>
+              <View style={styles.photoColumn}>{photoBlock}</View>
+              <View style={styles.detailColumn}>{resultCard}</View>
             </View>
-          </View>
-        </Pressable>
-
-        {/* Kondisi 3: TIDAK DIKENALI */}
-        {isUnrecognized ? (
-          <View style={styles.card}>
-            <Text style={styles.unrecognizedTitle}>Motif tidak dikenali</Text>
-            <Text style={styles.unrecognizedText}>
-              Motif ini belum termasuk 6 motif yang dikenali aplikasi.
-            </Text>
-
-            <View style={styles.buttonGroup}>
-              <Pressable style={styles.secondaryButton} onPress={handleOpenHelp}>
-                <AppIcon name="help-circle-outline" size={20} color={Colors.accent} />
-                <Text style={styles.secondaryButtonText}>Buka Panduan Foto</Text>
-              </Pressable>
-              <Pressable style={styles.primaryButton} onPress={handleScanAgain}>
-                <AppIcon name="scan-outline" size={20} color={Colors.onPrimaryButton} />
-                <Text style={styles.primaryButtonText}>Pindai Lagi</Text>
-              </Pressable>
+          ) : isWeb ? (
+            <View style={styles.stackContent}>
+              {photoBlock}
+              {resultCard}
             </View>
-          </View>
-        ) : (
-          /* Kondisi 1 & 2: DIKENALI */
-          <View style={styles.card}>
-            {/* Lencana Kecocokan */}
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>Kecocokan {formattedScore}%</Text>
-            </View>
-
-            {/* Nama Motif */}
-            <Text style={styles.motifTitle}>
-              {motif_details?.name || predicted_class}
-            </Text>
-
-            {/* Kondisi 2: Peringatan Skor < 60 */}
-            {isLowConfidence && (
-              <View style={styles.warningCard}>
-                <AppIcon name="alert-circle-outline" size={24} color={Colors.accent} />
-                <Text style={styles.warningText}>
-                  Tingkat kemiripan rendah. Pastikan foto mengikuti panduan di Tab Bantuan.
-                </Text>
-              </View>
-            )}
-
-            {/* Detail Motif (Asal, Filosofi, Ciri) */}
-            {motif_details && (
-              <View style={styles.detailsContainer}>
-                {motif_details.origin ? (
-                  <View style={styles.detailSection}>
-                    <Text style={styles.detailLabel}>Asal</Text>
-                    <Text style={styles.detailValue}>{motif_details.origin}</Text>
-                  </View>
-                ) : null}
-
-                {motif_details.philosophy ? (
-                  <View style={styles.detailSection}>
-                    <Text style={styles.detailLabel}>Filosofi</Text>
-                    <Text style={styles.detailValue}>{motif_details.philosophy}</Text>
-                  </View>
-                ) : null}
-
-                {motif_details.characteristics ? (
-                  <View style={styles.detailSection}>
-                    <Text style={styles.detailLabel}>Ciri</Text>
-                    <Text style={styles.detailValue}>{motif_details.characteristics}</Text>
-                  </View>
-                ) : null}
-              </View>
-            )}
-
-            {/* Tombol Aksi */}
-            <View style={styles.buttonGroup}>
-              {isLowConfidence && (
-                <Pressable style={styles.secondaryButton} onPress={handleOpenHelp}>
-                  <AppIcon name="help-circle-outline" size={20} color={Colors.accent} />
-                  <Text style={styles.secondaryButtonText}>Buka Panduan Foto</Text>
-                </Pressable>
-              )}
-              <Pressable style={styles.primaryButton} onPress={handleScanAgain}>
-                <AppIcon name="scan-outline" size={20} color={Colors.onPrimaryButton} />
-                <Text style={styles.primaryButtonText}>Pindai Lagi</Text>
-              </Pressable>
-              {motifSlug ? (
-                <Pressable
-                  style={styles.secondaryButton}
-                  onPress={() =>
-                    router.push({
-                      pathname: '/(tabs)/catalog',
-                      params: { motif: motifSlug },
-                    })
-                  }
-                >
-                  <Text style={styles.secondaryButtonText}>Lihat di Katalog</Text>
-                </Pressable>
-              ) : null}
-            </View>
-          </View>
-        )}
+          ) : (
+            <>
+              {photoBlock}
+              {resultCard}
+            </>
+          )}
+        </ResponsiveContainer>
       </ScrollView>
 
       {isLightboxVisible ? (
@@ -208,6 +240,25 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 20,
+    gap: 20,
+  },
+  scrollContentWeb: {
+    padding: 0,
+  },
+  desktopRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 32,
+  },
+  photoColumn: {
+    width: 480,
+    maxWidth: '100%',
+  },
+  detailColumn: {
+    flex: 1,
+    minWidth: 0,
+  },
+  stackContent: {
     gap: 20,
   },
   centerContainer: {

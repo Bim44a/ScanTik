@@ -5,6 +5,7 @@ import {
   StyleSheet,
   FlatList,
   TextInput,
+  Platform,
   useWindowDimensions,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
@@ -17,6 +18,7 @@ import AppIcon from '@/components/AppIcon';
 import FilterChip from '@/components/FilterChip';
 import MotifCard from '@/components/MotifCard';
 import MotifSheet from '@/components/MotifSheet';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 
 type RegionFilter = 'Semua' | 'Pekalongan' | 'Cirebon';
 
@@ -24,7 +26,22 @@ export default function CatalogScreen() {
   const insets = useSafeAreaInsets();
   const { motif: motifSlug } = useLocalSearchParams<{ motif?: string }>();
   const { width } = useWindowDimensions();
-  const cardWidth = (width - 16 * 2 - 12) / 2;
+  const breakpoint = useBreakpoint();
+  const isWeb = Platform.OS === 'web';
+  const columns = isWeb ? (breakpoint === 'mobile' ? 2 : 3) : 2;
+  const webMaxWidth = breakpoint === 'tablet' ? 720 : 1120;
+  const webPadding =
+    breakpoint === 'mobile' ? 16 : breakpoint === 'tablet' ? 24 : 32;
+  const sidebarWidth = isWeb && breakpoint === 'desktop' ? 240 : 0;
+  const availableWidth = isWeb
+    ? Math.max(
+        0,
+        Math.min(width - sidebarWidth, webMaxWidth) - webPadding * 2
+      )
+    : width - 16 * 2;
+  const cardWidth = isWeb
+    ? (availableWidth - 12 * (columns - 1)) / columns
+    : (width - 16 * 2 - 12) / 2;
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<RegionFilter>('Semua');
   const [selectedMotif, setSelectedMotif] = useState<Motif | null>(null);
@@ -62,14 +79,26 @@ export default function CatalogScreen() {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + 16 }]}>
-      <View style={styles.header}>
+    <View
+      style={[
+        styles.container,
+        { paddingTop: insets.top + 16 },
+        isWeb && styles.webContainer,
+        isWeb && { maxWidth: webMaxWidth },
+      ]}
+    >
+      <View style={[styles.header, isWeb && { paddingHorizontal: webPadding }]}>
         <Text style={styles.title}>Katalog Motif</Text>
         <Text style={styles.subtitle}>Pelajari 6 motif batik pesisir utara Jawa.</Text>
       </View>
 
       {/* Search Bar */}
-      <View style={styles.searchBar}>
+      <View
+        style={[
+          styles.searchBar,
+          isWeb && { marginHorizontal: webPadding },
+        ]}
+      >
         <AppIcon name="search-outline" size={20} color={Colors.textSecondary} />
         <TextInput
           style={styles.searchInput}
@@ -81,7 +110,12 @@ export default function CatalogScreen() {
       </View>
 
       {/* Filter Bar */}
-      <View style={styles.filterBar}>
+      <View
+        style={[
+          styles.filterBar,
+          isWeb && { paddingHorizontal: webPadding },
+        ]}
+      >
         {(['Semua', 'Pekalongan', 'Cirebon'] as RegionFilter[]).map((r) => (
           <FilterChip
             key={r}
@@ -93,10 +127,18 @@ export default function CatalogScreen() {
       </View>
 
       {/* Count */}
-      <Text style={styles.countText}>{filteredMotifs.length} motif</Text>
+      <Text
+        style={[
+          styles.countText,
+          isWeb && { paddingHorizontal: webPadding },
+        ]}
+      >
+        {filteredMotifs.length} motif
+      </Text>
 
       {/* Grid */}
       <FlatList
+        key={isWeb ? `grid-${columns}` : 'grid-2'}
         style={styles.listContainer}
         data={filteredMotifs}
         renderItem={({ item }) => (
@@ -107,9 +149,12 @@ export default function CatalogScreen() {
           />
         )}
         keyExtractor={(item) => item.class}
-        numColumns={2}
+        numColumns={columns}
         columnWrapperStyle={styles.columnWrapper}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={[
+          styles.list,
+          isWeb && { paddingHorizontal: webPadding },
+        ]}
         ListEmptyComponent={
           <Text style={styles.emptyText}>Motif tidak ditemukan</Text>
         }
@@ -124,6 +169,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
+  },
+  webContainer: {
+    width: '100%',
+    alignSelf: 'center',
   },
   header: {
     paddingHorizontal: 16,

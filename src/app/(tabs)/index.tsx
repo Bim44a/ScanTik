@@ -8,6 +8,8 @@ import {
   Alert,
   ActivityIndicator,
   FlatList,
+  Platform,
+  useWindowDimensions,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { router, useFocusEffect } from 'expo-router';
@@ -27,13 +29,32 @@ import SurfaceCard from '@/components/SurfaceCard';
 import IconCircle from '@/components/IconCircle';
 import SectionHeader from '@/components/SectionHeader';
 import HowItWorks from '@/components/HowItWorks';
+import MotifCard from '@/components/MotifCard';
 import MotifMiniCard from '@/components/MotifMiniCard';
 import PhotoTips from '@/components/PhotoTips';
 import RecentScanRow from '@/components/RecentScanRow';
+import ResponsiveContainer from '@/components/ResponsiveContainer';
 import { openHistoryItem } from '@/utils/openHistoryItem';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 
 export default function ScannerScreen() {
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const breakpoint = useBreakpoint();
+  const isWeb = Platform.OS === 'web';
+  const isDesktopWeb = isWeb && breakpoint === 'desktop';
+  const isWideWeb = isWeb && breakpoint !== 'mobile';
+
+  const webMaxWidth = breakpoint === 'tablet' ? 720 : 1120;
+  const webPadding =
+    breakpoint === 'mobile' ? 16 : breakpoint === 'tablet' ? 24 : 32;
+  const sidebarWidth = isDesktopWeb ? 240 : 0;
+  const availableWidth = Math.max(
+    0,
+    Math.min(width - sidebarWidth, webMaxWidth) - webPadding * 2
+  );
+  const gridCardWidth = (availableWidth - 12 * 2) / 3;
+
   const [isLoading, setIsLoading] = useState(false);
   const [recent, setRecent] = useState<HistoryItem[]>([]);
 
@@ -153,125 +174,181 @@ export default function ScannerScreen() {
     });
   };
 
+  const headerBlock = (
+    <View style={styles.header}>
+      <Text style={styles.welcome}>Selamat datang,</Text>
+      <Text style={styles.title}>ScanTik</Text>
+      <Text style={styles.tagline}>
+        Kenali motif batik pesisir dalam sekali foto.
+      </Text>
+    </View>
+  );
+
+  const actionBlock = (
+    <SurfaceCard style={styles.actionCard}>
+      <Pressable
+        style={[styles.uploadZone, isLoading && styles.dimmed]}
+        onPress={startScan}
+        disabled={isLoading}
+      >
+        <IconCircle name="image-outline" size={56} iconSize={26} />
+        <Text style={styles.uploadText}>
+          Unggah foto kain batik untuk mengenali motifnya.
+        </Text>
+        <Text style={styles.uploadHint}>JPG / PNG · Maks. 10 MB</Text>
+      </Pressable>
+
+      <Pressable
+        style={[styles.primaryButton, isLoading && styles.primaryButtonDisabled]}
+        onPress={startScan}
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <ActivityIndicator color={Colors.onPrimaryButton} size="small" />
+        ) : (
+          <AppIcon name="images-outline" size={20} color={Colors.onPrimaryButton} />
+        )}
+        <Text style={styles.primaryButtonText}>
+          {isLoading ? 'Menghubungkan ke Server...' : 'Pilih dari Galeri'}
+        </Text>
+      </Pressable>
+
+      <Text style={styles.footerText}>
+        Foto Anda hanya digunakan untuk identifikasi.
+      </Text>
+    </SurfaceCard>
+  );
+
+  const howItWorksBlock = (
+    <View style={styles.section}>
+      <HowItWorks />
+    </View>
+  );
+
+  const motifsBlock = (
+    <View style={styles.section}>
+      <SectionHeader
+        title="Motif yang dikenali"
+        subtitle="6 motif"
+        rightLabel="Lihat semua"
+        onRightPress={() => router.push('/(tabs)/catalog')}
+      />
+      {isWideWeb ? (
+        <View style={styles.motifGrid}>
+          {MOTIFS.map((item) => (
+            <View
+              key={item.class}
+              style={[
+                { width: gridCardWidth },
+                isLoading && styles.dimmed,
+              ]}
+              pointerEvents={isLoading ? 'none' : 'auto'}
+            >
+              <MotifCard
+                motif={item}
+                width={gridCardWidth}
+                onPress={() => openMotif(item.class)}
+              />
+            </View>
+          ))}
+        </View>
+      ) : (
+        <FlatList
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          data={MOTIFS}
+          keyExtractor={(item) => item.class}
+          contentContainerStyle={styles.motifList}
+          renderItem={({ item }) => (
+            <MotifMiniCard
+              motif={item}
+              disabled={isLoading}
+              onPress={() => openMotif(item.class)}
+            />
+          )}
+        />
+      )}
+    </View>
+  );
+
+  const tipsBlock = (
+    <View style={styles.section}>
+      <PhotoTips onOpenHelp={() => router.push('/(tabs)/help')} />
+    </View>
+  );
+
+  const recentBlock = (
+    <View style={[styles.section, isDesktopWeb && styles.sectionNoTop]}>
+      <SectionHeader
+        title="Pindaian terbaru"
+        rightLabel="Lihat semua"
+        onRightPress={() => router.push('/(tabs)/history')}
+      />
+
+      {recent.length === 0 ? (
+        <SurfaceCard style={styles.emptyCard}>
+          <Text style={styles.emptyTitle}>Belum ada pindaian</Text>
+          <Text style={styles.emptyText}>
+            Pilih foto kain batik untuk memulai.
+          </Text>
+          <Pressable
+            style={[styles.secondaryButton, isLoading && styles.dimmed]}
+            onPress={startScan}
+            disabled={isLoading}
+          >
+            <Text style={styles.secondaryButtonText}>Pilih Foto</Text>
+          </Pressable>
+        </SurfaceCard>
+      ) : (
+        <View style={styles.recentList}>
+          {recent.map((item) => (
+            <RecentScanRow
+              key={item.id}
+              item={item}
+              onPress={() => openHistoryItem(item)}
+            />
+          ))}
+        </View>
+      )}
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
+          isWeb && styles.scrollContentWeb,
           { paddingTop: insets.top + 24 },
         ]}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.welcome}>Selamat datang,</Text>
-          <Text style={styles.title}>ScanTik</Text>
-          <Text style={styles.tagline}>
-            Kenali motif batik pesisir dalam sekali foto.
-          </Text>
-        </View>
-
-        {/* Kartu aksi */}
-        <SurfaceCard style={styles.actionCard}>
-          <Pressable
-            style={[styles.uploadZone, isLoading && styles.dimmed]}
-            onPress={startScan}
-            disabled={isLoading}
-          >
-            <IconCircle name="image-outline" size={56} iconSize={26} />
-            <Text style={styles.uploadText}>
-              Unggah foto kain batik untuk mengenali motifnya.
-            </Text>
-            <Text style={styles.uploadHint}>JPG / PNG · Maks. 10 MB</Text>
-          </Pressable>
-
-          <Pressable
-            style={[styles.primaryButton, isLoading && styles.primaryButtonDisabled]}
-            onPress={startScan}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color={Colors.onPrimaryButton} size="small" />
-            ) : (
-              <AppIcon name="images-outline" size={20} color={Colors.onPrimaryButton} />
-            )}
-            <Text style={styles.primaryButtonText}>
-              {isLoading ? 'Menghubungkan ke Server...' : 'Pilih dari Galeri'}
-            </Text>
-          </Pressable>
-
-          <Text style={styles.footerText}>
-            Foto Anda hanya digunakan untuk identifikasi.
-          </Text>
-        </SurfaceCard>
-
-        {/* Cara kerja */}
-        <View style={styles.section}>
-          <HowItWorks />
-        </View>
-
-        {/* Motif yang dikenali */}
-        <View style={styles.section}>
-          <SectionHeader
-            title="Motif yang dikenali"
-            subtitle="6 motif"
-            rightLabel="Lihat semua"
-            onRightPress={() => router.push('/(tabs)/catalog')}
-          />
-          <FlatList
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            data={MOTIFS}
-            keyExtractor={(item) => item.class}
-            contentContainerStyle={styles.motifList}
-            renderItem={({ item }) => (
-              <MotifMiniCard
-                motif={item}
-                disabled={isLoading}
-                onPress={() => openMotif(item.class)}
-              />
-            )}
-          />
-        </View>
-
-        {/* Tips foto */}
-        <View style={styles.section}>
-          <PhotoTips onOpenHelp={() => router.push('/(tabs)/help')} />
-        </View>
-
-        {/* Pindaian terbaru */}
-        <View style={styles.section}>
-          <SectionHeader
-            title="Pindaian terbaru"
-            rightLabel="Lihat semua"
-            onRightPress={() => router.push('/(tabs)/history')}
-          />
-
-          {recent.length === 0 ? (
-            <SurfaceCard style={styles.emptyCard}>
-              <Text style={styles.emptyTitle}>Belum ada pindaian</Text>
-              <Text style={styles.emptyText}>
-                Pilih foto kain batik untuk memulai.
-              </Text>
-              <Pressable
-                style={[styles.secondaryButton, isLoading && styles.dimmed]}
-                onPress={startScan}
-                disabled={isLoading}
-              >
-                <Text style={styles.secondaryButtonText}>Pilih Foto</Text>
-              </Pressable>
-            </SurfaceCard>
+        <ResponsiveContainer maxWidth={webMaxWidth}>
+          {isDesktopWeb ? (
+            <>
+              <View style={styles.desktopColumns}>
+                <View style={styles.desktopLeft}>
+                  {headerBlock}
+                  {actionBlock}
+                  {howItWorksBlock}
+                </View>
+                <View style={styles.desktopRight}>
+                  {recentBlock}
+                  {tipsBlock}
+                </View>
+              </View>
+              {motifsBlock}
+            </>
           ) : (
-            <View style={styles.recentList}>
-              {recent.map((item) => (
-                <RecentScanRow
-                  key={item.id}
-                  item={item}
-                  onPress={() => openHistoryItem(item)}
-                />
-              ))}
-            </View>
+            <>
+              {headerBlock}
+              {actionBlock}
+              {howItWorksBlock}
+              {motifsBlock}
+              {tipsBlock}
+              {recentBlock}
+            </>
           )}
-        </View>
+        </ResponsiveContainer>
       </ScrollView>
     </View>
   );
@@ -286,6 +363,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 24,
     paddingBottom: 120,
+  },
+  scrollContentWeb: {
+    paddingHorizontal: 0,
+  },
+  desktopColumns: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 24,
+  },
+  desktopLeft: {
+    flex: 58,
+  },
+  desktopRight: {
+    flex: 42,
+  },
+  sectionNoTop: {
+    marginTop: 0,
   },
   header: {
     marginBottom: 24,
@@ -359,6 +453,12 @@ const styles = StyleSheet.create({
   },
   motifList: {
     marginTop: 12,
+    gap: 12,
+  },
+  motifGrid: {
+    marginTop: 12,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 12,
   },
   emptyCard: {
