@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
-  Alert,
   ActivityIndicator,
   FlatList,
   Platform,
@@ -35,6 +34,7 @@ import PhotoTips from '@/components/PhotoTips';
 import RecentScanRow from '@/components/RecentScanRow';
 import ResponsiveContainer from '@/components/ResponsiveContainer';
 import { openHistoryItem } from '@/utils/openHistoryItem';
+import { showMessage } from '@/utils/dialog';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 
 export default function ScannerScreen() {
@@ -76,22 +76,25 @@ export default function ScannerScreen() {
   const startScan = async () => {
     // Cek alamat server
     if (!API_BASE_URL) {
-      Alert.alert(
+      showMessage(
         'Alamat server belum diatur',
         'Silakan atur EXPO_PUBLIC_API_URL di berkas .env dan restart aplikasi.'
       );
       return;
     }
 
-    // Minta izin akses galeri
-    const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    // Minta izin akses galeri (di web izin tidak diperlukan dan permintaan izin
+    // dapat membatalkan aktivasi pengguna sebelum dialog file dibuka)
+    if (!isWeb) {
+      const { granted } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    if (!granted) {
-      Alert.alert(
-        'Izin dibutuhkan',
-        'Untuk memilih foto, ScanTik memerlukan izin akses galeri. Buka pengaturan dan aktifkan izin Foto.'
-      );
-      return;
+      if (!granted) {
+        showMessage(
+          'Izin dibutuhkan',
+          'Untuk memilih foto, ScanTik memerlukan izin akses galeri. Buka pengaturan dan aktifkan izin Foto.'
+        );
+        return;
+      }
     }
 
     // Buka galeri
@@ -109,7 +112,7 @@ export default function ScannerScreen() {
 
     // Cek ukuran file jika tersedia (10 MB = 10 * 1024 * 1024 bytes)
     if (asset.fileSize && asset.fileSize > 10 * 1024 * 1024) {
-      Alert.alert(
+      showMessage(
         'Ukuran foto terlalu besar',
         'Foto maksimal 10 MB. Pilih foto lain atau kompres terlebih dahulu.'
       );
@@ -127,7 +130,7 @@ export default function ScannerScreen() {
       const predictResult = await predictImage(compressedUri);
 
       if (!predictResult.ok) {
-        Alert.alert('Gagal mengenali motif', predictResult.message);
+        showMessage('Gagal mengenali motif', predictResult.message);
         return;
       }
 
@@ -156,7 +159,7 @@ export default function ScannerScreen() {
       });
     } catch (error) {
       console.error('Process error:', error);
-      Alert.alert(
+      showMessage(
         'Terjadi kesalahan',
         'Proses tidak dapat diselesaikan. Coba lagi.'
       );

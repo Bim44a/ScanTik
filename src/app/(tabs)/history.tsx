@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
-  Alert,
   Image,
   Platform,
   useWindowDimensions,
@@ -25,6 +24,7 @@ import IconCircle from '@/components/IconCircle';
 import SectionHeader from '@/components/SectionHeader';
 import SurfaceCard from '@/components/SurfaceCard';
 import { WebDocumentTitle } from '@/components/ResponsiveContainer';
+import { confirmAction } from '@/utils/dialog';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 
 type HistoryGroupKey = 'today' | 'yesterday' | 'older';
@@ -125,18 +125,17 @@ export default function HistoryScreen() {
     router.push({ pathname: '/result', params: { sessionId: item.id } });
   };
 
-  const handleClearHistory = () => {
-    Alert.alert('Hapus Riwayat', 'Hapus semua riwayat pindaian?', [
-      { text: 'Batal', style: 'cancel' },
-      {
-        text: 'Hapus',
-        style: 'destructive',
-        onPress: async () => {
-          await clearHistory();
-          await loadHistory();
-        },
-      },
-    ]);
+  const handleClearHistory = async () => {
+    const confirmed = await confirmAction(
+      'Hapus Riwayat',
+      'Hapus semua riwayat pindaian?',
+      'Hapus'
+    );
+    if (!confirmed) {
+      return;
+    }
+    await clearHistory();
+    await loadHistory();
   };
 
   const renderItem = (item: HistoryItem, groupKey: HistoryGroupKey) => {
