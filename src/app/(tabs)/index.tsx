@@ -37,6 +37,12 @@ import { openHistoryItem } from '@/utils/openHistoryItem';
 import { showMessage } from '@/utils/dialog';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 
+const DESKTOP_PHOTO_TIPS = [
+  'Cahaya terang dan merata',
+  'Kain rata, tidak terlipat',
+  'Foto tegak lurus',
+];
+
 export default function ScannerScreen() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
@@ -188,7 +194,9 @@ export default function ScannerScreen() {
   );
 
   const actionBlock = (
-    <SurfaceCard style={styles.actionCard}>
+    <SurfaceCard
+      style={[styles.actionCard, isDesktopWeb && styles.desktopColumnCard]}
+    >
       <Pressable
         style={[styles.uploadZone, isLoading && styles.dimmed]}
         onPress={startScan}
@@ -316,6 +324,65 @@ export default function ScannerScreen() {
     </View>
   );
 
+  const desktopRecentBlock = (
+    <SurfaceCard style={[styles.desktopRecentCard, styles.desktopColumnCard]}>
+      <SectionHeader
+        title="Pindaian terbaru"
+        rightLabel="Lihat semua"
+        onRightPress={() => router.push('/(tabs)/history')}
+      />
+
+      {recent.length === 0 ? (
+        <SurfaceCard style={styles.emptyCard}>
+          <Text style={styles.emptyTitle}>Belum ada pindaian</Text>
+          <Text style={styles.emptyText}>
+            Pilih foto kain batik untuk memulai.
+          </Text>
+          <Pressable
+            style={[styles.secondaryButton, isLoading && styles.dimmed]}
+            onPress={startScan}
+            disabled={isLoading}
+          >
+            <Text style={styles.secondaryButtonText}>Pilih Foto</Text>
+          </Pressable>
+        </SurfaceCard>
+      ) : (
+        <View style={styles.recentList}>
+          {recent.slice(0, 3).map((item) => (
+            <RecentScanRow
+              key={item.id}
+              item={item}
+              onPress={() => openHistoryItem(item)}
+            />
+          ))}
+        </View>
+      )}
+    </SurfaceCard>
+  );
+
+  const desktopTipsBlock = (
+    <View style={styles.section}>
+      <SectionHeader title="Tips foto" />
+      <SurfaceCard style={styles.desktopTipsCard}>
+        <View style={styles.desktopTipsRow}>
+          {DESKTOP_PHOTO_TIPS.map((tip) => (
+            <View key={tip} style={styles.desktopTipItem}>
+              <AppIcon name="checkmark" size={16} color={Colors.accent} />
+              <Text style={styles.desktopTipText}>{tip}</Text>
+            </View>
+          ))}
+        </View>
+        <Pressable
+          onPress={() => router.push('/(tabs)/help')}
+          hitSlop={8}
+          style={styles.desktopTipsLinkButton}
+        >
+          <Text style={styles.desktopTipsLink}>Lihat panduan lengkap</Text>
+        </Pressable>
+      </SurfaceCard>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -328,18 +395,14 @@ export default function ScannerScreen() {
         <ResponsiveContainer maxWidth={webMaxWidth}>
           {isDesktopWeb ? (
             <>
+              {headerBlock}
               <View style={styles.desktopColumns}>
-                <View style={styles.desktopLeft}>
-                  {headerBlock}
-                  {actionBlock}
-                  {howItWorksBlock}
-                </View>
-                <View style={styles.desktopRight}>
-                  {recentBlock}
-                  {tipsBlock}
-                </View>
+                {actionBlock}
+                {desktopRecentBlock}
               </View>
+              {howItWorksBlock}
               {motifsBlock}
+              {desktopTipsBlock}
             </>
           ) : (
             <>
@@ -372,14 +435,41 @@ const styles = StyleSheet.create({
   },
   desktopColumns: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'stretch',
     gap: 24,
   },
-  desktopLeft: {
-    flex: 58,
+  desktopColumnCard: {
+    flex: 1,
   },
-  desktopRight: {
-    flex: 42,
+  desktopRecentCard: {
+    padding: 16,
+  },
+  desktopTipsCard: {
+    marginTop: 12,
+    padding: 16,
+    gap: 12,
+  },
+  desktopTipsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 24,
+  },
+  desktopTipItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  desktopTipText: {
+    ...Typography.cardBody,
+    fontSize: 14,
+    color: Colors.textPrimary,
+  },
+  desktopTipsLinkButton: {
+    alignSelf: 'flex-start',
+  },
+  desktopTipsLink: {
+    ...Typography.linkGold,
+    color: Colors.accent,
   },
   sectionNoTop: {
     marginTop: 0,

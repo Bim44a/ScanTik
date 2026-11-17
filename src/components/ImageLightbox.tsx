@@ -96,8 +96,8 @@ function WebImageLightbox({
       statusBarTranslucent
       onRequestClose={onClose}
     >
-      <Pressable style={styles.overlay} onPress={onClose}>
-        <View style={styles.webContent}>
+      <Pressable style={[styles.overlay, styles.webOverlay]} onPress={onClose}>
+        <View style={styles.webStage}>
           <View
             style={[
               styles.webImageFrame,
@@ -110,7 +110,9 @@ function WebImageLightbox({
               resizeMode="contain"
             />
           </View>
-          {caption ? <Text style={styles.caption}>{caption}</Text> : null}
+          {caption ? (
+            <Text style={[styles.caption, styles.webCaption]}>{caption}</Text>
+          ) : null}
         </View>
 
         <Pressable
@@ -146,16 +148,27 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 12,
   },
-  webContent: {
+  webOverlay: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  webStage: {
     flex: 1,
+    alignSelf: 'stretch',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 16,
     gap: 16,
   },
   webImageFrame: {
+    alignSelf: 'center',
+    maxWidth: '90%',
+    maxHeight: '85%',
     borderRadius: 12,
     overflow: 'hidden',
+  },
+  webCaption: {
+    maxWidth: '90%',
   },
   caption: {
     ...Typography.cardBody,
