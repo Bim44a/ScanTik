@@ -83,10 +83,14 @@ function WebImageLightbox({
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
 
+  // Ukuran bingkai pasti (piksel), bukan persentase tanpa acuan.
   // Sisihkan ruang keterangan agar gambar dan teks tetap utuh.
   const captionReserve = caption ? 56 : 0;
-  const frameWidth = width * 0.9;
-  const frameHeight = Math.max(160, height * 0.85 - captionReserve);
+  const frameWidth = Math.round(width * 0.9);
+  const frameHeight = Math.max(
+    1,
+    Math.round(height * 0.85) - captionReserve
+  );
 
   return (
     <Modal
@@ -104,9 +108,12 @@ function WebImageLightbox({
               { width: frameWidth, height: frameHeight },
             ]}
           >
+            {/* width/height 100% menimpa ukuran intrinsik aset statis
+                (imageSizeStyle dari react-native-web) agar kotak gambar
+                selalu mengisi bingkai dan benar-benar di tengah. */}
             <Image
               source={source}
-              style={StyleSheet.absoluteFill}
+              style={[StyleSheet.absoluteFill, styles.webImage]}
               resizeMode="contain"
             />
           </View>
@@ -149,6 +156,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   webOverlay: {
+    ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -162,10 +170,12 @@ const styles = StyleSheet.create({
   },
   webImageFrame: {
     alignSelf: 'center',
-    maxWidth: '90%',
-    maxHeight: '85%',
     borderRadius: 12,
     overflow: 'hidden',
+  },
+  webImage: {
+    width: '100%',
+    height: '100%',
   },
   webCaption: {
     maxWidth: '90%',

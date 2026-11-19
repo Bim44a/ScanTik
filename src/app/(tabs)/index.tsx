@@ -333,7 +333,7 @@ export default function ScannerScreen() {
       />
 
       {recent.length === 0 ? (
-        <SurfaceCard style={styles.emptyCard}>
+        <View style={styles.desktopEmpty}>
           <Text style={styles.emptyTitle}>Belum ada pindaian</Text>
           <Text style={styles.emptyText}>
             Pilih foto kain batik untuk memulai.
@@ -345,7 +345,7 @@ export default function ScannerScreen() {
           >
             <Text style={styles.secondaryButtonText}>Pilih Foto</Text>
           </Pressable>
-        </SurfaceCard>
+        </View>
       ) : (
         <View style={styles.recentList}>
           {recent.slice(0, 3).map((item) => (
@@ -443,6 +443,10 @@ const styles = StyleSheet.create({
   },
   desktopRecentCard: {
     padding: 16,
+  },
+  desktopEmpty: {
+    marginTop: 12,
+    gap: 8,
   },
   desktopTipsCard: {
     marginTop: 12,
