@@ -6,6 +6,8 @@ import { AppIconName } from './AppIcon';
 import IconCircle from './IconCircle';
 import SurfaceCard from './SurfaceCard';
 
+const ICON_SIZE = 40;
+
 interface Step {
   number: string;
   title: string;
@@ -47,16 +49,21 @@ export default function HowItWorks() {
           const isLast = index === STEPS.length - 1;
 
           return (
-            <View key={step.number} style={styles.row}>
+            <View
+              key={step.number}
+              style={[styles.row, !isLast && styles.rowMinHeight]}
+            >
+              {isLast ? null : <View style={styles.connector} />}
+
               <View style={styles.timeline}>
-                <IconCircle name={step.icon} size={40} iconSize={20} />
-                {isLast ? null : <View style={styles.connector} />}
+                <IconCircle
+                  name={step.icon}
+                  size={ICON_SIZE}
+                  iconSize={20}
+                />
               </View>
 
-              <View
-                style={[styles.textColumn, !isLast && styles.textColumnSpacing]}
-              >
-                <Text style={styles.watermark}>{step.number}</Text>
+              <View style={styles.textColumn}>
                 <Text style={styles.stepTitle}>{step.title}</Text>
                 <Text style={styles.stepBody}>{step.description}</Text>
               </View>
@@ -79,27 +86,27 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-    alignItems: 'stretch',
+    alignItems: 'flex-start',
     gap: 12,
   },
+  rowMinHeight: {
+    minHeight: 76,
+  },
   timeline: {
-    width: 40,
+    width: ICON_SIZE,
     alignItems: 'center',
-    alignSelf: 'stretch',
   },
   connector: {
+    position: 'absolute',
+    left: ICON_SIZE / 2 - 1,
+    top: ICON_SIZE,
+    bottom: 0,
     width: 2,
-    flex: 1,
-    marginTop: 8,
     backgroundColor: Colors.border,
   },
   textColumn: {
     flex: 1,
-    paddingRight: 36,
     gap: 2,
-  },
-  textColumnSpacing: {
-    marginBottom: 16,
   },
   stepTitle: {
     ...Typography.cardTitle,
@@ -109,15 +116,5 @@ const styles = StyleSheet.create({
     ...Typography.cardBody,
     fontSize: 13,
     color: Colors.textSecondary,
-  },
-  watermark: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    fontFamily: 'Poppins_700Bold',
-    fontSize: 40,
-    lineHeight: 46,
-    letterSpacing: 0,
-    color: Colors.accentSoft,
   },
 });
