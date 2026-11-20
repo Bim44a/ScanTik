@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,14 +8,17 @@ import {
   ScrollView,
   SafeAreaView,
   Platform,
+  Image,
 } from 'react-native';
 import { Motif } from '@/data/motifs';
 import { MOTIF_META } from '@/data/motifMeta';
+import { getMotifPhoto } from '@/data/motifPhotos';
 import { Colors } from '@/theme/colors';
 import { Typography } from '@/theme/typography';
 import OriginChip from './OriginChip';
 import IconCircle from './IconCircle';
 import AppIcon from './AppIcon';
+import ImageLightbox from './ImageLightbox';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 
 export interface MotifSheetProps {
@@ -26,10 +29,13 @@ export interface MotifSheetProps {
 export default function MotifSheet({ motif, onClose }: MotifSheetProps) {
   const breakpoint = useBreakpoint();
   const isDialog = Platform.OS === 'web' && breakpoint !== 'mobile';
+  const [isLightboxVisible, setIsLightboxVisible] = useState(false);
 
   if (!motif) return null;
 
   const meta = MOTIF_META[motif.class];
+  const photo = getMotifPhoto(meta?.slug);
+  const motifLabel = motif.name.replace(/^Batik\s+/i, '');
 
   const sheet = (
     <View style={isDialog ? styles.dialogSheet : styles.sheet}>
@@ -40,10 +46,33 @@ export default function MotifSheet({ motif, onClose }: MotifSheetProps) {
         contentContainerStyle={styles.scrollContent}
         style={isDialog ? styles.dialogScroll : undefined}
       >
-        {/* Placeholder Gambar 16:9 */}
-        <View style={styles.imagePlaceholder}>
-          <IconCircle name={meta?.icon || 'help-outline'} size={120} iconSize={48} />
-        </View>
+        {/* Foto motif 16:9 (dapat diketuk) atau placeholder */}
+        {photo ? (
+          <Pressable
+            onPress={() => setIsLightboxVisible(true)}
+            accessibilityRole="imagebutton"
+            accessibilityLabel="Perbesar foto motif"
+          >
+            <View style={styles.photoFrame}>
+              <Image
+                source={photo.source}
+                style={[StyleSheet.absoluteFill, styles.image]}
+                resizeMode="cover"
+              />
+              <View style={styles.expandHint}>
+                <AppIcon
+                  name="expand-outline"
+                  size={18}
+                  color={Colors.textPrimary}
+                />
+              </View>
+            </View>
+          </Pressable>
+        ) : (
+          <View style={styles.imagePlaceholder}>
+            <IconCircle name={meta?.icon || 'help-outline'} size={120} iconSize={48} />
+          </View>
+        )}
 
         {/* Nama Motif */}
         <Text style={styles.title}>{motif.name}</Text>
@@ -71,21 +100,33 @@ export default function MotifSheet({ motif, onClose }: MotifSheetProps) {
   );
 
   return (
-    <Modal
-      visible={!!motif}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={onClose}
-    >
-      <Pressable style={styles.overlay} onPress={onClose} />
-      {isDialog ? (
-        <View style={styles.dialogWrapper} pointerEvents="box-none">
-          {sheet}
-        </View>
-      ) : (
-        sheet
-      )}
-    </Modal>
+    <>
+      <Modal
+        visible={!!motif}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={onClose}
+      >
+        <Pressable style={styles.overlay} onPress={onClose} />
+        {isDialog ? (
+          <View style={styles.dialogWrapper} pointerEvents="box-none">
+            {sheet}
+          </View>
+        ) : (
+          sheet
+        )}
+      </Modal>
+
+      {/* Pratinjau ditaruh di luar Modal lembar agar tidak bersarang. */}
+      {photo ? (
+        <ImageLightbox
+          visible={isLightboxVisible}
+          source={photo.source}
+          caption={`Batik ${motifLabel} · Foto: ${photo.credit}`}
+          onClose={() => setIsLightboxVisible(false)}
+        />
+      ) : null}
+    </>
   );
 }
 
@@ -145,6 +186,29 @@ const styles = StyleSheet.create({
     aspectRatio: 16 / 9,
     backgroundColor: Colors.surfaceElevated,
     borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  photoFrame: {
+    width: '100%',
+    aspectRatio: 16 / 9,
+    backgroundColor: Colors.surfaceElevated,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+  },
+  expandHint: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.surface,
+    opacity: 0.85,
     alignItems: 'center',
     justifyContent: 'center',
   },

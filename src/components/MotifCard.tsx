@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import { Motif } from '@/data/motifs';
 import { MOTIF_META, getRegion } from '@/data/motifMeta';
+import { getMotifPhoto } from '@/data/motifPhotos';
 import { Colors } from '@/theme/colors';
 import { Typography } from '@/theme/typography';
 import SurfaceCard from './SurfaceCard';
@@ -22,14 +23,25 @@ export interface MotifCardProps {
 export default function MotifCard({ motif, width, onPress }: MotifCardProps) {
   const meta = MOTIF_META[motif.class];
   const region = getRegion(motif.origin);
+  const photo = getMotifPhoto(meta?.slug);
 
   return (
     <Pressable onPress={onPress} style={[styles.container, { width }]}>
       <SurfaceCard style={styles.card}>
-        {/* Placeholder Gambar 4:3 */}
-        <View style={styles.imagePlaceholder}>
-          <IconCircle name={meta?.icon || 'help-outline'} size={64} iconSize={28} />
-        </View>
+        {/* Foto motif 4:3, atau placeholder ikon bila foto belum tersedia */}
+        {photo ? (
+          <View style={styles.photoFrame}>
+            <Image
+              source={photo.source}
+              style={[StyleSheet.absoluteFill, styles.image]}
+              resizeMode="cover"
+            />
+          </View>
+        ) : (
+          <View style={styles.imagePlaceholder}>
+            <IconCircle name={meta?.icon || 'help-outline'} size={64} iconSize={28} />
+          </View>
+        )}
 
         <View style={styles.content}>
           <Text style={styles.name} numberOfLines={1}>
@@ -60,6 +72,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 10,
+  },
+  photoFrame: {
+    width: '100%',
+    aspectRatio: 4 / 3,
+    backgroundColor: Colors.surfaceElevated,
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 10,
+  },
+  image: {
+    width: '100%',
+    height: '100%',
   },
   content: {
     gap: 6,
