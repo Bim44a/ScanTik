@@ -110,7 +110,7 @@ flowchart LR
 ### Instalasi
 
 ```bash
-git clone <URL-repositori-ini>
+git clone https://github.com/Bim44a/ScanTik.git
 cd scantik-app
 npm install
 ```
