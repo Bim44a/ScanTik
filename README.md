@@ -217,6 +217,4 @@ Kode pelatihan dan API ada di repositori terpisah (lihat bawah).
 
 ## Pengembang
 
-**Bima** — Mahasiswa Informatika
-
-Dibuat sebagai proyek UAS mata kuliah Pemrograman Berbasis Platform.
+**Bima Adi Nugroho**
